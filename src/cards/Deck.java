@@ -8,12 +8,10 @@ public class Deck {
 
     public Deck() {
         Random random = new Random();
-
-        for(int i = 0; i < 16; i++) {
+        for(int i = 0; i < 13; i++) {
             for(int j = 0; j < 4; j++) {
-                Boolean isSpecial = random.nextBoolean();
                 CardPicture picture = new CardPicture();
-                if(isSpecial) {
+                if(random.nextBoolean()) {
                     cards[i + j] = new SpecialCard(picture);
                 }
                 else {
@@ -21,7 +19,11 @@ public class Deck {
                 }
             }
         }
+    }
 
+    public Card pullOutACard() {
+        Random random = new Random();
+        return cards[random.nextInt(52)];
     }
 
 }

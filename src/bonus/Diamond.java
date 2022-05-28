@@ -1,8 +1,7 @@
 package bonus;
 
-public class Diamond {
+public class Diamond extends Bonus {
     public Diamond() {
-
+        super();
     }
-
 }

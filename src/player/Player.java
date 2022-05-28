@@ -27,4 +27,5 @@ public class Player {
     public void setFigures(Figure[] figures) {
         this.figures = figures;
     }
+
 }
