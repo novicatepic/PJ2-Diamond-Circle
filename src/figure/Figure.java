@@ -5,20 +5,19 @@ import main.DiamondCircle;
 
 abstract public class Figure {
     private String colour;
-    private int numberOfFields;
     private int position;
+    private final Object lock = new Object();
 
     public Figure() {
         position = 0;
     }
 
-    public Figure(String colour, int numberOfFields) throws IncorrectColour {
+    public Figure(String colour) throws IncorrectColour {
         if(!"red".equalsIgnoreCase(colour) && !"green".equalsIgnoreCase(colour) &&
             !"blue".equalsIgnoreCase(colour) && !"yellow".equalsIgnoreCase(colour)) {
             throw new IncorrectColour();
         }
         this.colour = colour;
-        this.numberOfFields = numberOfFields;
     }
 
     public String getColour() {
@@ -30,19 +29,13 @@ abstract public class Figure {
     }
 
     public int getPosition() {
-        return position;
+        //synchronized (lock) {
+            return position;
+        //}
     }
 
     public void setPosition(int position) {
         this.position = position;
-    }
-
-    public int getNumberOfFields() {
-        return numberOfFields;
-    }
-
-    public void setNumberOfFields(int numberOfFields) {
-        this.numberOfFields = numberOfFields;
     }
 
     public String checkTypeOfFigure() {

@@ -2,6 +2,7 @@ package figure;
 
 import bonus.Bonus;
 import bonus.Diamond;
+import hole.Hole;
 import main.DiamondCircle;
 
 import java.util.ArrayList;
@@ -40,8 +41,11 @@ public class GhostFigure extends Thread {
             for(int i = 0; i < randomPositions.size(); i++) {
                 Integer randomPosition = randomPositions.get(i);
                 Bonus bonus = new Diamond();
-                DiamondCircle.setMapTraversal(randomPosition, bonus);
-                sleep(5000);
+                if(!(DiamondCircle.getMapTraversal().get(randomPosition) instanceof Figure) &&
+                        !(DiamondCircle.getMapTraversal().get(randomPosition) instanceof Hole)) {
+                    DiamondCircle.setMapTraversal(randomPosition, bonus);
+                    sleep(5000);
+                }
             }
         }
         catch(InterruptedException ex) {

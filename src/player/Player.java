@@ -8,7 +8,7 @@ public class Player {
     private Figure[] figures = new Figure[DiamondCircle.NUMBER_OF_FIGURES];
 
     public Player(String name, Figure[] figures) {
-        this.name = name + id;
+        this.name = name + id++;
         this.figures = figures;
     }
 
@@ -16,16 +16,7 @@ public class Player {
         return name;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
     public Figure[] getFigures() {
         return figures;
     }
-
-    public void setFigures(Figure[] figures) {
-        this.figures = figures;
-    }
-
 }
