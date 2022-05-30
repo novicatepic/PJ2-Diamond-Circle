@@ -1,15 +1,16 @@
 package figure;
 
 import exceptions.IncorrectColour;
-import main.DiamondCircle;
+import main.GameMatrix;
 
 abstract public class Figure {
     private String colour;
     private int position;
-    private final Object lock = new Object();
+    private long time;
 
     public Figure() {
         position = 0;
+        time = 0;
     }
 
     public Figure(String colour) throws IncorrectColour {
@@ -24,18 +25,20 @@ abstract public class Figure {
         return colour;
     }
 
-    void setColour(String colour) {
-        this.colour = colour;
-    }
-
     public int getPosition() {
-        //synchronized (lock) {
-            return position;
-        //}
+        return position;
     }
 
     public void setPosition(int position) {
         this.position = position;
+    }
+
+    public long getTime() {
+        return time;
+    }
+
+    public void setTime(long time) {
+        this.time = time;
     }
 
     public String checkTypeOfFigure() {
@@ -51,6 +54,6 @@ abstract public class Figure {
     }
 
     public boolean didFigureFinish() {
-        return (position == DiamondCircle.getMapTraversal().size() - 1);
+        return (position == GameMatrix.getMapTraversal().size() - 1);
     }
 }

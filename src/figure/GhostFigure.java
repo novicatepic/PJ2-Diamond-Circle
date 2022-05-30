@@ -3,7 +3,7 @@ package figure;
 import bonus.Bonus;
 import bonus.Diamond;
 import hole.Hole;
-import main.DiamondCircle;
+import main.GameMatrix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,21 +18,17 @@ public class GhostFigure extends Thread {
     public GhostFigure() {
         super();
         Random random = new Random();
-        numberOfDiamonds = random.nextInt(DiamondCircle.getMatrixDimensions() - 2) + 2;
+        numberOfDiamonds = random.nextInt(GameMatrix.getMatrixDimensions() - 2) + 2;
         randomPositions = new ArrayList<>();
         int temp = numberOfDiamonds;
-        //System.out.println("NUMBER OF ELEMS " + DiamondCircle.getMapTraversal().size());
         while(temp > 0) {
-            int positionFromMatrix = random.nextInt(DiamondCircle.getMapTraversal().size());
+            int positionFromMatrix = random.nextInt(GameMatrix.getMapTraversal().size());
             if(!randomPositions.contains(positionFromMatrix)) {
                 randomPositions.add(positionFromMatrix);
                 temp--;
             }
         }
         randomPositions = randomPositions.stream().sorted().collect(Collectors.toList());
-        /*for(int position : randomPositions) {
-            System.out.println(position + " ");
-        }*/
     }
 
     @Override
@@ -41,9 +37,9 @@ public class GhostFigure extends Thread {
             for(int i = 0; i < randomPositions.size(); i++) {
                 Integer randomPosition = randomPositions.get(i);
                 Bonus bonus = new Diamond();
-                if(!(DiamondCircle.getMapTraversal().get(randomPosition) instanceof Figure) &&
-                        !(DiamondCircle.getMapTraversal().get(randomPosition) instanceof Hole)) {
-                    DiamondCircle.setMapTraversal(randomPosition, bonus);
+                if(!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
+                        !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
+                    GameMatrix.setMapTraversal(randomPosition, bonus);
                     sleep(5000);
                 }
             }
