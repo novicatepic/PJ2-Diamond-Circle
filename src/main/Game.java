@@ -1,18 +1,13 @@
 package main;
 
 import FigureInterface.IDroppable;
-import FigureInterface.IFly;
 import FigureInterface.SuperFast;
 import bonus.Bonus;
 import cards.Card;
 import cards.Deck;
 import cards.SimpleCard;
 import cards.SpecialCard;
-import exceptions.IncorrectColour;
-import exceptions.InvalidMatrixDimension;
-import exceptions.InvalidNumberOfPlayers;
 import figure.Figure;
-import figure.FlyingFigure;
 import figure.GhostFigure;
 import hole.Hole;
 import player.Player;
@@ -30,9 +25,11 @@ import java.util.logging.Logger;
 public class Game extends Thread {
 
     private static boolean pause = false;
+    private GhostFigure ghostFigure = new GhostFigure();
     public static Handler handler;
+    private boolean isItOverFlag = false;
 
-    {
+    static {
         try {
             handler = new FileHandler("game.log");
             Logger.getLogger(Game.class.getName()).addHandler(handler);
@@ -42,6 +39,7 @@ public class Game extends Thread {
     }
 
     private boolean checkIfAllKeysAreEmpty(ArrayList<HashMap<Player, Integer>> list, Player[] randomizedPlayers) {
+        System.out.println("4");
         for (HashMap<Player, Integer> elem : list) {
             for (Player p : randomizedPlayers) {
                 if (!elem.containsKey(p)) {
@@ -56,8 +54,10 @@ public class Game extends Thread {
     }
 
     private int getWhichFigureIsPlayerPlayingWith(ArrayList<HashMap<Player, Integer>> list, int pos, Player p) {
+        System.out.println("5");
         HashMap<Player, Integer> map = list.get(pos);
-        Integer value = map.get(p);
+        int value = map.get(p);
+        System.out.println("INT VALUE: " + value);
         switch (value) {
             case 4:
                 return 0;
@@ -128,6 +128,15 @@ public class Game extends Thread {
         try {
             while (!checkIfAllKeysAreEmpty(list, randomizedPlayers)) {
                 for (int i = 0; i < GameMatrix.getNumberOfPlayers(); i++) {
+                    if(isItOverFlag) {
+                        if(i != 0) {
+                            i--;
+                        }
+                        else {
+                            i = GameMatrix.getNumberOfPlayers() - 1;
+                        }
+                        isItOverFlag = false;
+                    }
                     long figureTimeStart = new Date().getTime();
                     long figureTimeFinish = 0;
                     if(pause) {
@@ -136,34 +145,32 @@ public class Game extends Thread {
                         }
                     }
                     if (getWhichFigureIsPlayerPlayingWith(list, i, randomizedPlayers[i]) != -1) {
-                        //System.out.println("RANDOMIZED PLAYERS: " + randomizedPlayers[i].getName());
+                        System.out.println("RANDOMIZED PLAYERS: " + randomizedPlayers[i].getName());
+                        System.out.println("FIGURE: " + getWhichFigureIsPlayerPlayingWith(list, i, randomizedPlayers[i]));
                         try {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(list, i, randomizedPlayers[i]);
-                            //System.out.println("WHICH FIGURE: " + whichFigure);
-                            //System.out.println("FIGURE TYPE: " + randomizedPlayers[i].getFigures()[whichFigure].checkTypeOfFigure());
                             if (helpBool) {
-                                new GhostFigure().start();
+                                ghostFigure.start();
                                 helpBool = false;
+                            }
+                            if(!ghostFigure.isAlive()) {
+                                ghostFigure = null;
+                                ghostFigure = new GhostFigure();
+                                ghostFigure.start();
                             }
                             Card card = deck.pullOutACard();
                             if (card instanceof SpecialCard) {
                                 processSpecialCard(random, i);
                             } else if (card instanceof SimpleCard) {
                                 if (processSimpleCard(randomizedPlayers, list, figureMap, i, whichFigure, (SimpleCard) card)) {
-                                    figureTimeFinish = new Date().getTime();
-                                    long finalTime = figureTimeFinish - figureTimeStart;
-                                    randomizedPlayers[i].getFigures()[whichFigure].setTime(
-                                            randomizedPlayers[i].getFigures()[whichFigure].getTime() + finalTime);
-                                    continue;
+                                    sleep(1000);
+                                    updateFigureTimeInThread(figureTimeFinish, figureTimeStart, randomizedPlayers[i], whichFigure);
                                 }
-                                /*else {
-                                    figureTimeFinish = new Date().getTime();
+                                else {
+                                    sleep(1000);
+                                    updateFigureTimeInThread(figureTimeFinish, figureTimeStart, randomizedPlayers[i], whichFigure);
                                 }
-                                long finalTime = figureTimeFinish - figureTimeStart;
-                                randomizedPlayers[i].getFigures()[whichFigure].setTime(
-                                        randomizedPlayers[i].getFigures()[whichFigure].getTime() + finalTime);*/
                             }
-                            sleep(1000);
                         } catch (InterruptedException ex) {
                             Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
                             ex.printStackTrace();
@@ -171,6 +178,7 @@ public class Game extends Thread {
                     }
                 }
             }
+            System.out.println("WRITTING TO FILES!");
             try {
                 writeToFiles(startTime, randomizedPlayers, figureMap);
             } catch (IOException ex) {
@@ -178,9 +186,17 @@ public class Game extends Thread {
                 ex.printStackTrace();
             }
         } catch (Exception ex) {
-            Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
+            //Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
             ex.printStackTrace();
         }
+    }
+
+    private void updateFigureTimeInThread(long figureTimeFinish, long figureTimeStart, Player randomizedPlayers, int whichFigure) {
+        System.out.println("3");
+        figureTimeFinish = new Date().getTime();
+        long finalTime = figureTimeFinish - figureTimeStart;
+        randomizedPlayers.getFigures()[whichFigure].setTime(
+                randomizedPlayers.getFigures()[whichFigure].getTime() + finalTime);
     }
 
     private void initializeHelpCollections(Player[] randomizedPlayers, ArrayList<HashMap<Player, Integer>> list, HashMap<Figure, String> figureMap) {
@@ -197,7 +213,8 @@ public class Game extends Thread {
         }
     }
 
-    private boolean processSimpleCard(Player[] randomizedPlayers, ArrayList<HashMap<Player, Integer>> list, HashMap<Figure, String> figureMap, int i, int whichFigure, SimpleCard card) throws InterruptedException {
+    private boolean processSimpleCard(Player[] randomizedPlayers, ArrayList<HashMap<Player, Integer>> list, HashMap<Figure,
+            String> figureMap, int i, int whichFigure, SimpleCard card) throws InterruptedException {
         int positionToGoTo = card.getNumberOfFieldsToCross();
         int playerPosition;
         synchronized (randomizedPlayers[i].getFigures()[whichFigure]) {
@@ -216,13 +233,16 @@ public class Game extends Thread {
                 } else continue;
             } else if (pos < GameMatrix.getMapTraversal().size() && GameMatrix.getMapTraversal().get(pos) instanceof Hole &&
                     (randomizedPlayers[i].getFigures()[whichFigure] instanceof IDroppable)) {
-                System.out.println("FIGURE EATEN!");
+                //System.out.println("FIGURE EATEN!");
                 GameMatrix.setMapTraversal(pos, null);
                 list.get(i).replace(randomizedPlayers[i], list.get(i).get(randomizedPlayers[i]) - 1);
+                if(list.get(i).get(randomizedPlayers[i]) > 0) {
+                    isItOverFlag = true;
+                }
                 sleep(1000);
                 return true;
             } else if (pos < GameMatrix.getMapTraversal().size() && GameMatrix.getMapTraversal().get(pos) instanceof Bonus) {
-                System.out.println("BONUS!");
+                //System.out.println("BONUS!");
                 GameMatrix.setMapTraversal(pos, null);
                 if (fullPosition != GameMatrix.getMapTraversal().size() - 1)
                     fullPosition++;
@@ -236,7 +256,7 @@ public class Game extends Thread {
                 return true;
             }
             if (pos < GameMatrix.getMapTraversal().size()) {
-                if (pos != GameMatrix.getMapTraversal().size() - 1) {
+                if (pos != GameMatrix.getMapTraversal().size() - 1 && (pos == fullPosition || pos == 0)) {
                     String newString = figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]) + "" +
                             GameMatrix.getOriginalMap().get(pos) + "-";
                     figureMap.replace(randomizedPlayers[i].getFigures()[whichFigure], newString);
@@ -255,20 +275,29 @@ public class Game extends Thread {
     private void processSpecialCard(Random random, int i) {
         Hole[] holes = new Hole[GameMatrix.NUMBER_OF_HOLES];
         for (int h = 0; h < holes.length; h++) {
-            holes[i] = new Hole();
+            holes[h] = new Hole();
         }
         List<Integer> holePositions = new ArrayList<>();
         int temp = GameMatrix.NUMBER_OF_HOLES;
+        if(temp > GameMatrix.getNumberOfFreePositionsInMatrix()) {
+            temp = GameMatrix.getNumberOfFreePositionsInMatrix();
+        }
+        System.out.println("FREE POSITIONS: " + GameMatrix.getNumberOfFreePositionsInMatrix());
+        System.out.println("TEMP: " + temp);
         while (temp > 0) {
-            Integer position = random.nextInt(GameMatrix.getMapTraversal().size());
-            if (!holePositions.contains(position)) {
+            System.out.println("111");
+            int position = random.nextInt(GameMatrix.getMapTraversal().size());
+            if (!holePositions.contains(position) && !(GameMatrix.getMapTraversal().get(position) instanceof Figure)
+                    && !(GameMatrix.getMapTraversal().get(position) instanceof Bonus)) {
+                //System.out.println("HOLE POSITION: " + position);
                 holePositions.add(position);
                 temp--;
             }
         }
         for (int k = 0; k < holePositions.size(); k++) {
-            if (!(GameMatrix.getMapTraversal().get(k) instanceof Figure) && !(GameMatrix.getMapTraversal().get(k) instanceof Bonus))
-                GameMatrix.setMapTraversal(k, holes[k]);
+            if (!(GameMatrix.getMapTraversal().get(k) instanceof Figure) && !(GameMatrix.getMapTraversal().get(k) instanceof Bonus)) {
+                GameMatrix.setMapTraversal(holePositions.get(k), holes[k]);
+            }
         }
     }
 
@@ -277,7 +306,7 @@ public class Game extends Thread {
         int innerCounter = 0;
         for (Player p : randomizedPlayers) {
             for (Figure f : p.getFigures()) {
-                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss");
+                SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS");
                 Date date = new Date();
                 PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(
                         "IGRA_" + sdf.format(date))));
@@ -290,7 +319,7 @@ public class Game extends Thread {
                 pw.println("Igrac " + (outerCounter + 1) + " - " + p.getName() + "\n" +
                         "Figura " + innerCounter++ + " (" + f.checkTypeOfFigure() + ", " + f.getColour() + ") - " +
                         "predjeni put (" + figureMap.get(f) + ") - stigla do cilja " + helpString + "\n" +
-                        "Ukupno vrijeme trajanja igre: " + f.getTime());
+                        "Ukupno vrijeme trajanja igre: " + f.getTime() / (double)1000 + "s");
                 pw.close();
                 sleep(1000);
             }
@@ -298,7 +327,7 @@ public class Game extends Thread {
         }
         PrintWriter pw = new PrintWriter(new BufferedWriter(new FileWriter(
                 "IGRA_VRIJEME_TRAJANJA")));
-        pw.println((new Date().getTime() - startTime) / (double)1000);
+        pw.println((new Date().getTime() - startTime) / (double)1000 + "s");
         pw.close();
     }
 }

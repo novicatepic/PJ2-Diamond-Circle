@@ -1,9 +1,12 @@
 package main;
 
+import bonus.Bonus;
 import exceptions.IncorrectColour;
 import exceptions.InvalidMatrixDimension;
 import exceptions.InvalidNumberOfPlayers;
 import figure.*;
+import hole.Hole;
+import pair.Pair;
 import player.Player;
 import java.util.*;
 
@@ -11,12 +14,12 @@ public class GameMatrix {
 
     public static final Integer NUMBER_OF_FIGURES = 4;
     private static int MATRIX_DIMENSIONS;
-    private final Object[][] MATRIX;
+    private static Object[][] MATRIX;
     private static int NUMBER_OF_PLAYERS;
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
-    public static final int NUMBER_OF_HOLES = 15;
+    public static final int NUMBER_OF_HOLES = 4;
 
     GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers, IncorrectColour {
         MATRIX_DIMENSIONS = loadMatrixDimensions();
@@ -40,17 +43,14 @@ public class GameMatrix {
     public static ArrayList<Object> getMapTraversal() {
         return mapTraversal;
     }
-
     public static ArrayList<Object> getOriginalMap() {
         return originalMap;
     }
-
     public static Player[] getPlayers() {return players;}
     public static int getNumberOfPlayers() {return NUMBER_OF_PLAYERS;}
     public static void setMapTraversal(int positon, Object element) {
         mapTraversal.set(positon, element);
     }
-
 
     private int loadMatrixDimensions() throws InvalidMatrixDimension {
         Scanner scanner = new Scanner(System.in);
@@ -62,7 +62,7 @@ public class GameMatrix {
         return Integer.parseInt(userInput);
     }
 
-    protected static int loadNumberOfPlayers() throws InvalidNumberOfPlayers {
+    private int loadNumberOfPlayers() throws InvalidNumberOfPlayers {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter number of players (2, 3 or 4): ");
         String userInput = scanner.nextLine();
@@ -72,7 +72,7 @@ public class GameMatrix {
         return Integer.parseInt(userInput);
     }
 
-    public static Figure[] generateFigures() throws IncorrectColour {
+    private Figure[] generateFigures() throws IncorrectColour {
         Random random = new Random();
         String colour = null;
         Figure[] resultFigures = new Figure[NUMBER_OF_FIGURES];
@@ -131,6 +131,29 @@ public class GameMatrix {
             newPlayers[k++] = players[number];
         }
         return newPlayers;
+    }
+
+    public static Pair getMatrixPositionOfElement(int position) {
+        int element = (Integer)originalMap.get(position);
+        for(int i = 0; i < MATRIX_DIMENSIONS; i++) {
+            for(int j = 0; j < MATRIX_DIMENSIONS; j++) {
+                if((Integer)MATRIX[i][j] == element) {
+                    return new Pair(i, j);
+                }
+            }
+        }
+        return null;
+    }
+
+    public static int getNumberOfFreePositionsInMatrix() {
+        int freePositionCounter = 0;
+        for(int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
+            if(!(GameMatrix.getMapTraversal().get(i) instanceof Bonus) && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)
+                    && !(GameMatrix.getMapTraversal().get(i) instanceof Hole)) {
+                freePositionCounter++;
+            }
+        }
+        return freePositionCounter;
     }
 
     /*public static void main(String[] args) throws Exception {
