@@ -7,8 +7,7 @@ public class SimpleCard extends Card {
 
     }
 
-    SimpleCard(CardPicture picture, int fieldNumber) {
-        super(picture);
+    SimpleCard(int fieldNumber) {
         this.numberOfFieldsToCross = fieldNumber;
     }
 
@@ -16,7 +15,4 @@ public class SimpleCard extends Card {
         return numberOfFieldsToCross;
     }
 
-    public void setNumberOfFieldsToCross(int numberOfFieldsToCross) {
-        this.numberOfFieldsToCross = numberOfFieldsToCross;
-    }
 }

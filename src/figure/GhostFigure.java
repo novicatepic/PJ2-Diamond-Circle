@@ -15,13 +15,14 @@ public class GhostFigure extends Thread {
     private Diamond[] diamonds;
     private int numberOfDiamonds;
     private List<Integer> randomPositions;
-    private int counter = 0;
+
+    private boolean isGhostAlive = true;
 
     public GhostFigure() {
         super();
         Random random = new Random();
         do {
-                System.out.println("GHOST: " + GameMatrix.getNumberOfFreePositionsInMatrix());
+                //System.out.println("GHOST: " + GameMatrix.getNumberOfFreePositionsInMatrix());
             numberOfDiamonds = random.nextInt(GameMatrix.getMatrixDimensions() - 2) + 2;
         } while (numberOfDiamonds > GameMatrix.getNumberOfFreePositionsInMatrix() &&
                 GameMatrix.getNumberOfFreePositionsInMatrix() >= 2);
@@ -42,21 +43,37 @@ public class GhostFigure extends Thread {
         randomPositions = randomPositions.stream().sorted().collect(Collectors.toList());
     }
 
+    public void setGhostAlive() {
+        isGhostAlive = false;
+    }
+
     @Override
     public void run() {
         try {
-            for(int i = 0; i < randomPositions.size(); i++) {
-                Integer randomPosition = randomPositions.get(i);
-                Bonus bonus = new Diamond();
-                if(!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
-                        !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
-                    GameMatrix.setMapTraversal(randomPosition, bonus);
-                    sleep(5000);
+            while(isGhostAlive) {
+                clearDiamonds();
+                for(int i = 0; i < randomPositions.size(); i++) {
+                    //System.out.println("GHOST");
+                    Integer randomPosition = randomPositions.get(i);
+                    Bonus bonus = new Diamond();
+                    if(!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
+                            !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
+                        GameMatrix.setMapTraversal(randomPosition, bonus);
+                        //sleep(5000);
+                    }
                 }
             }
         }
-        catch(InterruptedException ex) {
+        catch(/*InterruptedException*/ Exception ex) {
             ex.printStackTrace();
+        }
+    }
+
+    private void clearDiamonds() {
+        for(int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
+            if(GameMatrix.getMapTraversal().get(i) instanceof Bonus) {
+                GameMatrix.setMapTraversal(i, null);
+            }
         }
     }
 }

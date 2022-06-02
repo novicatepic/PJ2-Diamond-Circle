@@ -19,7 +19,9 @@ public class GameMatrix {
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
-    public static final int NUMBER_OF_HOLES = 4;
+    public static final int NUMBER_OF_HOLES = 20;
+    String[] colours = new String[]{"yellow", "blue", "red", "green"};
+    ArrayList<String> coloursList = new ArrayList<>(Arrays.asList(colours));
 
     GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers, IncorrectColour {
         MATRIX_DIMENSIONS = loadMatrixDimensions();
@@ -76,8 +78,11 @@ public class GameMatrix {
         Random random = new Random();
         String colour = null;
         Figure[] resultFigures = new Figure[NUMBER_OF_FIGURES];
-        int randomColour = random.nextInt(4) + 1;
-        switch (randomColour) {
+        int randomColour = random.nextInt(coloursList.size());
+        colour = coloursList.get(randomColour);
+        coloursList.remove(colour);
+
+        /*switch (randomColour) {
             case 1:
                 colour = "red";
                 break;
@@ -90,7 +95,7 @@ public class GameMatrix {
             case 4:
                 colour = "yellow";
                 break;
-        }
+        }*/
         for (int i = 0; i < NUMBER_OF_FIGURES; i++) {
             int randomFigure = random.nextInt(3) + 1;
             switch (randomFigure) {

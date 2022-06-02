@@ -1,13 +1,13 @@
 package cards;
 
 public class Card {
-    private CardPicture picture;
+    //private CardPicture picture;
 
     Card() {
 
     }
 
-    Card(CardPicture picture) {
+    /*Card(CardPicture picture) {
         this.picture = picture;
     }
 
@@ -17,6 +17,6 @@ public class Card {
 
     public void setPicture(CardPicture picture) {
         this.picture = picture;
-    }
+    }*/
 
 }

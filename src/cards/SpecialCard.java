@@ -5,7 +5,4 @@ public class SpecialCard extends Card {
 
     }
 
-    SpecialCard(CardPicture picture) {
-        super(picture);
-    }
 }
