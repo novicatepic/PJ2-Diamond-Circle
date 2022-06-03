@@ -59,7 +59,7 @@ public class GhostFigure extends Thread {
                     if(!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
                             !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
                         GameMatrix.setMapTraversal(randomPosition, bonus);
-                        //sleep(5000);
+                        sleep(5000);
                     }
                 }
             }
