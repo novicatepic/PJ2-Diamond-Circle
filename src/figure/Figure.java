@@ -1,7 +1,9 @@
 package figure;
 
 import exceptions.IncorrectColour;
-import main.GameMatrix;
+import game.GameMatrix;
+
+import java.awt.*;
 
 abstract public class Figure {
     private String colour;
@@ -25,6 +27,24 @@ abstract public class Figure {
         return colour;
     }
 
+    public Color getRealColour() {
+        if("yellow".equals(colour)) {
+            return Color.YELLOW;
+        }
+        else if("blue".equals(colour)) {
+            return Color.BLUE;
+        }
+        else if("red".equals(colour)) {
+            return Color.RED;
+        }
+        else if("green".equals(colour)) {
+            return Color.green;
+        }
+        else {
+            return null;
+        }
+    }
+
     public int getPosition() {
         return position;
     }
@@ -43,13 +63,13 @@ abstract public class Figure {
 
     public String checkTypeOfFigure() {
         if(this instanceof FlyingFigure) {
-            return "Lebdeca figura";
+            return "FF";
         }
         else if(this instanceof StandardFigure) {
-            return "Standardna figura";
+            return "SF";
         }
         else {
-            return "Super brza figura";
+            return "SF";
         }
     }
 

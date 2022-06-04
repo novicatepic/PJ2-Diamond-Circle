@@ -3,8 +3,7 @@ package figure;
 import bonus.Bonus;
 import bonus.Diamond;
 import hole.Hole;
-import main.Game;
-import main.GameMatrix;
+import game.GameMatrix;
 
 import java.util.ArrayList;
 import java.util.List;

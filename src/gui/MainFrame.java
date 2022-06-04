@@ -1,72 +1,71 @@
-package main;
+package gui;
 
-import player.Player;
+import game.Game;
+import game.GameMatrix;
+import pair.Pair;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.Scanner;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import java.util.ArrayList;
 
 public class MainFrame extends JFrame {
-    private final JLabel decriptionLabel;
-    /*private final JButton figureThreePlayerOne;
-            private final JButton figureFourPlayerOne;
-            private final JButton figureOnePlayerTwoo;
-            private final JButton figureTwoPlayerTwo;
-            private final JButton figureThreePlayerTwo;
-            private final JButton figureFourPlayerTwo;
-            private final JButton figureOnePlayerThree;
-            private final JButton figureTwoPlayerThree;
-            private final JButton figureThreePlayerThree;
-            private final JButton figureFourPlayerThree;
-            private final JButton figureOnePlayerFour;
-            private final JButton figureTwoPlayerFour;
-            private final JButton figureThreePlayerFour;
-            private final JButton figureFourPlayerFour;*/
     private JPanel mainPane;
     private JLabel lbWelcome;
     private JPanel matrixPanel;
-    private static int go = 0;
-    /*private JButton figure1Player1;
-    private JButton figureTwoPlayerOne;*/
+    private JLabel[][] matrixLabels = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
+    private JButton[] playerButtons = new JButton[16];
+    private JLabel currCardLabel;
+    private JLabel cardDescLabel;
+    private JLabel cardPicLabel;
 
-    private Game game;
+    private Game game = new Game();
 
-    public static void main(String[] args) {
-        MainFrame frame = new MainFrame();
-        frame.setVisible(true);
-        //frame.matrixPanel.
-        frame.game.start();
-
-        while (true) {
-            if(frame.game.currentPlayer != null) {
-                Timer timer = new Timer(1000, e -> frame.decriptionLabel.setText(/*"Na potezu je igrac " + */frame.game.currentPlayer.getName()/* + ", Figura " + "" +
-                        + frame.game.currentFigureNumber + ", prelazi " + frame.game.positionToGoTo + " polja")*/));
-                timer.setRepeats(true);
-                timer.start();
-            }
-        }
-
-
+    public void setCardDescLabel(String text) {
+        cardDescLabel.setText(text);
     }
 
-    public MainFrame() {
-        try {
-            new GameMatrix();
-        } catch(Exception e1) {
-            Logger.getLogger(Game.class.getName()).log(Level.WARNING, e1.fillInStackTrace().toString());
+    public void setCardPicLabel(String cardType) {
+        if("special".equals(cardType)) {
+            ImageIcon imageIcon = new ImageIcon("specialcard.jpg");
+            cardPicLabel.setIcon(imageIcon);
         }
-        game = new Game();
-        int numOfPlayers = GameMatrix.getNumberOfPlayers();
-        game.randomizedPlayers = new Player[numOfPlayers];
-        game.randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
+        else if("simple".equals(cardType)) {
+            ImageIcon imageIcon = new ImageIcon("simplecard.jpg");
+            cardPicLabel.setIcon(imageIcon);
+        }
+    }
+
+    public void setCurrCardLabel(String text) {
+        currCardLabel.setText(text);
+    }
+
+    public void setMatrixLabel(Color color, Pair pair, String newLabelString) {
+        int xCoordinate = pair.getX();
+        int yCoordinate = pair.getY();
+        //matrixLabels[xCoordinate][yCoordinate].setBackground(color);
+        matrixLabels[xCoordinate][yCoordinate].setForeground(color);
+        matrixLabels[xCoordinate][yCoordinate].setText(newLabelString);
+    }
+
+    public void clearHoles() {
+        for(int i = 0; i < GameMatrix.getMatrixDimensions(); i++) {
+            for(int j = 0; j < GameMatrix.getMatrixDimensions(); j++) {
+                if(matrixLabels[i][j].getText() != null && matrixLabels[i][j].getText().equals("H")) {
+                    matrixLabels[i][j].setText(String.valueOf(i * GameMatrix.getMatrixDimensions() + j + 1));
+                }
+            }
+        }
+    }
+
+    public MainFrame(Game game) {
+        this.game = game;
 
         setTitle("Welcome");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
         setBounds(100, 100, 870, 686);
         mainPane = new JPanel();
         mainPane.setBorder(new EmptyBorder(5, 5, 5, 5));
@@ -156,89 +155,20 @@ public class MainFrame extends JFrame {
         mainPane.add(figurePanel);
         figurePanel.setLayout(null);
 
-        JButton figure1Player1 = new JButton("Figura 1");
-        figure1Player1.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-            }
-        });
-        figure1Player1.setBounds(10, 10, 85, 21);
-        figurePanel.add(figure1Player1);
+        int initYValue = 10;
+        for(int i = 0; i < playerButtons.length; i++) {
+            int temp = i + 1;
+            playerButtons[i] = new JButton("Figura" + temp);
+            playerButtons[i].setBounds(10, initYValue, 85, 21);
+            initYValue += 31;
+            figurePanel.add(playerButtons[i]);
+        }
+        disablePlayerButtons(playerButtons[8], playerButtons[9], playerButtons[10], playerButtons[11], playerButtons[12], playerButtons[13], playerButtons[14], playerButtons[15]);
 
-        JButton figureTwoPlayerOne = new JButton("Figura 2");
-        figureTwoPlayerOne.setBounds(10, 41, 85, 21);
-        figurePanel.add(figureTwoPlayerOne);
-
-        JButton figureThreePlayerOne = new JButton("Figura 3");
-        figureThreePlayerOne.setBounds(10, 72, 85, 21);
-        figurePanel.add(figureThreePlayerOne);
-
-        JButton figureFourPlayerOne = new JButton("Figura 4");
-        figureFourPlayerOne.setBounds(10, 100, 85, 21);
-        figurePanel.add(figureFourPlayerOne);
-
-        JButton figureOnePlayerTwoo = new JButton("Figura 5");
-        figureOnePlayerTwoo.setBounds(10, 131, 85, 21);
-        figurePanel.add(figureOnePlayerTwoo);
-
-        JButton figureTwoPlayerTwo = new JButton("Figura 6");
-        figureTwoPlayerTwo.setBounds(10, 162, 85, 21);
-        figurePanel.add(figureTwoPlayerTwo);
-
-        JButton figureThreePlayerTwo = new JButton("Figura 7");
-        figureThreePlayerTwo.setBounds(10, 193, 85, 21);
-        figurePanel.add(figureThreePlayerTwo);
-
-        JButton figureFourPlayerTwo = new JButton("Figura 8");
-        figureFourPlayerTwo.setBounds(10, 224, 85, 21);
-        figurePanel.add(figureFourPlayerTwo);
-
-        JButton figureOnePlayerThree = new JButton("Figura 9");
-        figureOnePlayerThree.setBounds(10, 255, 85, 21);
-        figurePanel.add(figureOnePlayerThree);
-
-        JButton figureTwoPlayerThree = new JButton("Figura10");
-        figureTwoPlayerThree.setBounds(10, 286, 85, 21);
-        figurePanel.add(figureTwoPlayerThree);
-
-        JButton figureThreePlayerThree = new JButton("Figura11");
-        figureThreePlayerThree.setBounds(10, 317, 85, 21);
-        figurePanel.add(figureThreePlayerThree);
-
-        JButton figureFourPlayerThree = new JButton("Figura12");
-        figureFourPlayerThree.setBounds(10, 348, 85, 21);
-        figurePanel.add(figureFourPlayerThree);
-
-        JButton figureOnePlayerFour = new JButton("Figura13");
-        figureOnePlayerFour.setBounds(10, 378, 85, 21);
-        figurePanel.add(figureOnePlayerFour);
-
-        JButton figureTwoPlayerFour = new JButton("Figura14");
-        figureTwoPlayerFour.setBounds(10, 409, 85, 21);
-        figurePanel.add(figureTwoPlayerFour);
-
-        JButton figureThreePlayerFour = new JButton("Figura15");
-        figureThreePlayerFour.setBounds(10, 440, 85, 21);
-        figurePanel.add(figureThreePlayerFour);
-
-        JButton figureFourPlayerFour = new JButton("Figura16");
-        figureFourPlayerFour.setBounds(10, 471, 85, 21);
-        figurePanel.add(figureFourPlayerFour);
-
-        JPanel cardDescriptionPanel = new JPanel();
-        cardDescriptionPanel.setBounds(125, 533, 584, 106);
-        mainPane.add(cardDescriptionPanel);
-        cardDescriptionPanel.setLayout(null);
-
-        JLabel cardDescriptionLabel = new JLabel("Opis znacenja karte:");
-        cardDescriptionLabel.setFont(new Font("Tahoma", Font.BOLD, 14));
-        cardDescriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        cardDescriptionLabel.setBounds(184, 10, 243, 37);
-        cardDescriptionPanel.add(cardDescriptionLabel);
-
-        decriptionLabel = new JLabel("New label");
-        decriptionLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        decriptionLabel.setBounds(232, 57, 138, 39);
-        cardDescriptionPanel.add(decriptionLabel);
+        currCardLabel = new JLabel("New label");
+        currCardLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        currCardLabel.setBounds(125, 536, 584, 103);
+        mainPane.add(currCardLabel);
 
         JPanel showFilesPanel = new JPanel();
         showFilesPanel.setBounds(719, 533, 127, 106);
@@ -254,11 +184,51 @@ public class MainFrame extends JFrame {
         mainPane.add(cardPanel);
         cardPanel.setLayout(null);
 
-        initializeConcreteLabel("Trenutna karta", 10, 20, 107, 22, cardPanel);
+        cardDescLabel = new JLabel("New label");
+        cardDescLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        cardDescLabel.setBounds(10, 319, 107, 50);
+        cardPanel.add(cardDescLabel);
 
+        cardPicLabel = new JLabel("");
+        cardPicLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        cardPicLabel.setBounds(10, 52, 107, 272);
+        cardPanel.add(cardPicLabel);
+
+        initializeConcreteLabel("Trenutna karta", 10, 20, 107, 22, cardPanel);
         initializeMatrix();
 
-        disablePlayerButtons(figureOnePlayerThree, figureTwoPlayerThree, figureThreePlayerThree, figureFourPlayerThree, figureOnePlayerFour, figureTwoPlayerFour, figureThreePlayerFour, figureFourPlayerFour);
+        buttonActionListener(0, 0, 0, game);
+        buttonActionListener(1, 0, 1, game);
+        buttonActionListener(2, 0, 2, game);
+        buttonActionListener(3, 0, 3, game);
+        buttonActionListener(4, 1, 0, game);
+        buttonActionListener(5, 1, 1, game);
+        buttonActionListener(6, 1, 2, game);
+        buttonActionListener(7, 1, 3, game);
+
+        if(playerButtons[8].isEnabled()) {
+            buttonActionListener(8, 2, 0, game);
+            buttonActionListener(9, 2, 0, game);
+            buttonActionListener(10, 2, 0, game);
+            buttonActionListener(11, 2, 0, game);
+        }
+
+        if(playerButtons[12].isEnabled()) {
+            buttonActionListener(12, 2, 0, game);
+            buttonActionListener(13, 2, 0, game);
+            buttonActionListener(14, 2, 0, game);
+            buttonActionListener(15, 2, 0, game);
+        }
+
+    }
+
+    private void buttonActionListener(int x, int x1, int x2, Game game) {
+        playerButtons[x].addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                PathForm pathForm = new PathForm(game.getRandomizedPlayers()[x1].getFigures()[x2].getPosition());
+                pathForm.setVisible(true);
+            }
+        });
     }
 
     private void setFigureLabelColours(int x, JLabel playerOneLabel) {
@@ -286,12 +256,16 @@ public class MainFrame extends JFrame {
     private void initializeMatrix() {
         matrixPanel = new JPanel();
         matrixPanel.setBounds(125, 136, 584, 390);
+        matrixPanel.setBorder(BorderFactory.createLineBorder(Color.BLACK));
         mainPane.add(matrixPanel);
         matrixPanel.setLayout(new GridLayout(GameMatrix.getMatrixDimensions(), GameMatrix.getMatrixDimensions()));
-        for(int i = 0; i < GameMatrix.getMatrixDimensions() * GameMatrix.getMatrixDimensions(); i++) {
-            JLabel l = new JLabel();
-            l.setText(String.valueOf(i + 1));
-            matrixPanel.add(l);
+        for(int i = 0; i < GameMatrix.getMatrixDimensions(); i++) {
+            for(int j = 0; j < GameMatrix.getMatrixDimensions(); j++) {
+                matrixLabels[i][j] = new JLabel();
+                String text = String.valueOf(i * GameMatrix.getMatrixDimensions() + j + 1);
+                matrixLabels[i][j].setText(text);
+                matrixPanel.add(matrixLabels[i][j]);
+            }
         }
     }
 
@@ -314,4 +288,7 @@ public class MainFrame extends JFrame {
         figureThreePlayerFour.setEnabled(false);
         figureFourPlayerFour.setEnabled(false);
     }
+
+
+
 }

@@ -1,4 +1,4 @@
-package main;
+package path;
 import java.util.ArrayList;
 
 public class PathClass {

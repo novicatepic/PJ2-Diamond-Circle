@@ -1,6 +1,6 @@
 package player;
 import figure.Figure;
-import main.GameMatrix;
+import game.GameMatrix;
 
 public class Player {
     private String name;

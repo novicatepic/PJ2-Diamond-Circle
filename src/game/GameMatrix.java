@@ -1,4 +1,4 @@
-package main;
+package game;
 
 import bonus.Bonus;
 import exceptions.IncorrectColour;
@@ -7,6 +7,7 @@ import exceptions.InvalidNumberOfPlayers;
 import figure.*;
 import hole.Hole;
 import pair.Pair;
+import path.PathClass;
 import player.Player;
 import java.util.*;
 
@@ -39,6 +40,9 @@ public class GameMatrix {
         }
     }
 
+    public static Object[][] getMATRIX() {
+        return MATRIX;
+    }
     public static int getMatrixDimensions() {
         return MATRIX_DIMENSIONS;
     }
