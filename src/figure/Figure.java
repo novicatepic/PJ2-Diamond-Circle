@@ -74,6 +74,6 @@ abstract public class Figure {
     }
 
     public boolean didFigureFinish() {
-        return (position == GameMatrix.getMapTraversal().size() - 1);
+        return (position == GameMatrix.getMapTraversal().size());
     }
 }

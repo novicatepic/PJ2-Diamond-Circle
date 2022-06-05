@@ -10,6 +10,7 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
+import java.util.Timer;
 
 public class MainFrame extends JFrame {
     private JPanel mainPane;
@@ -20,6 +21,18 @@ public class MainFrame extends JFrame {
     private JLabel currCardLabel;
     private JLabel cardDescLabel;
     private JLabel cardPicLabel;
+    private static int gamesPlayed = 0;
+    private static JLabel labelGamesPlayed;
+    private JPanel[] squarePanels = new JPanel[4];
+
+    public static int getGamesPlayed() {
+        return gamesPlayed;
+    }
+
+    public static void setGamesPlayed(int gamesPlayed1) {
+        gamesPlayed = gamesPlayed1;
+        labelGamesPlayed.setText(gamesPlayed + " odigranih igara!");
+    }
 
     private Game game = new Game();
 
@@ -27,7 +40,13 @@ public class MainFrame extends JFrame {
         cardDescLabel.setText(text);
     }
 
-    public void setCardPicLabel(String cardType) {
+    public void setCardPicLabel(String cardType, int value) {
+        System.out.println("VALUE: " + value);
+
+        for(JPanel panel : squarePanels) {
+            panel.setBackground(Color.WHITE);
+        }
+
         if("special".equals(cardType)) {
             ImageIcon imageIcon = new ImageIcon("specialcard.jpg");
             cardPicLabel.setIcon(imageIcon);
@@ -36,6 +55,11 @@ public class MainFrame extends JFrame {
             ImageIcon imageIcon = new ImageIcon("simplecard.jpg");
             cardPicLabel.setIcon(imageIcon);
         }
+
+        for(int i = 0; i < value; i++) {
+            squarePanels[i].setBackground(Color.BLACK);
+        }
+
     }
 
     public void setCurrCardLabel(String text) {
@@ -64,7 +88,8 @@ public class MainFrame extends JFrame {
         this.game = game;
 
         setTitle("Welcome");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        //was exit on close
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         setBounds(100, 100, 870, 686);
         mainPane = new JPanel();
@@ -76,7 +101,7 @@ public class MainFrame extends JFrame {
         lbWelcome.setBounds(10, 93, 576, 33);
         mainPane.add(lbWelcome);
 
-        JLabel labelGamesPlayed = new JLabel("New label");
+        labelGamesPlayed = new JLabel();
         labelGamesPlayed.setBounds(34, 23, 150, 25);
         mainPane.add(labelGamesPlayed);
 
@@ -89,7 +114,7 @@ public class MainFrame extends JFrame {
         mainPane.add(labelDiamondCircle);
 
         JButton startStopButton = new JButton("Pokreni / zaustavi");
-        startStopButton.setBounds(628, 23, 136, 27);
+        startStopButton.setBounds(710, 22, 136, 27);
         mainPane.add(startStopButton);
 
         startStopButton.addActionListener(new ActionListener() {
@@ -175,9 +200,17 @@ public class MainFrame extends JFrame {
         mainPane.add(showFilesPanel);
         showFilesPanel.setLayout(null);
 
-        JButton showFilesButton = new JButton("Prikaz liste fajlova sa rezultatima");
+        JButton showFilesButton = new JButton("FAJLOVI");
         showFilesButton.setBounds(21, 10, 85, 86);
         showFilesPanel.add(showFilesButton);
+
+        showFilesButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                FileForm fileForm = new FileForm();
+                fileForm.setVisible(true);
+            }
+        });
 
         JPanel cardPanel = new JPanel();
         cardPanel.setBounds(719, 133, 127, 390);
@@ -191,7 +224,7 @@ public class MainFrame extends JFrame {
 
         cardPicLabel = new JLabel("");
         cardPicLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        cardPicLabel.setBounds(10, 52, 107, 272);
+        cardPicLabel.setBounds(10, 52, 107, 139);
         cardPanel.add(cardPicLabel);
 
         initializeConcreteLabel("Trenutna karta", 10, 20, 107, 22, cardPanel);
@@ -219,6 +252,50 @@ public class MainFrame extends JFrame {
             buttonActionListener(14, 2, 0, game);
             buttonActionListener(15, 2, 0, game);
         }
+
+        JLabel timePlayedLabel = new JLabel();
+        timePlayedLabel.setBounds(516, 10, 184, 32);
+        mainPane.add(timePlayedLabel);
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                long start = System.currentTimeMillis();
+                while (true) {
+                    long time = System.currentTimeMillis() - start;
+                    long seconds = time / 1000;
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            currCardLabel.setText(currCardLabel.getText());
+                            timePlayedLabel.setText("Vrijeme: " + seconds);
+                        }
+                    });
+                    try {
+                        Thread.sleep(1000);
+                    } catch (Exception e) {
+
+                    }
+                }
+            }
+        }).start();
+
+        JPanel panel = new JPanel();
+        panel.setBounds(10, 201, 38, 46);
+        cardPanel.add(panel);
+        squarePanels[0] = panel;
+        JPanel panel_1 = new JPanel();
+        panel_1.setBounds(68, 201, 38, 46);
+        cardPanel.add(panel_1);
+        squarePanels[1] = panel_1;
+        JPanel panel_2 = new JPanel();
+        panel_2.setBounds(10, 257, 38, 46);
+        cardPanel.add(panel_2);
+        squarePanels[2] = panel_2;
+        JPanel panel_3 = new JPanel();
+        panel_3.setBounds(68, 257, 38, 46);
+        cardPanel.add(panel_3);
+        squarePanels[3] = panel_3;
 
     }
 
@@ -288,7 +365,4 @@ public class MainFrame extends JFrame {
         figureThreePlayerFour.setEnabled(false);
         figureFourPlayerFour.setEnabled(false);
     }
-
-
-
 }

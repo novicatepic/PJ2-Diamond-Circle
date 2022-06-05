@@ -14,18 +14,11 @@ public class PathForm extends JFrame {
     private JLabel matrixLabels[][] = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
 
     public PathForm(int elem) {
-        /*for(Object element : GameMatrix.getOriginalMap()) {
-            if((Integer)element != elem) {
-                this.position++;
-            }
-            else {
-                break;
-            }
-        }*/
         position = elem;
         for(int i = 0; i < position; i++) {
             integersToPrint.add((Integer)GameMatrix.getOriginalMap().get(i));
         }
+        setResizable(false);
         setDefaultCloseOperation(DISPOSE_ON_CLOSE);
         setBounds(100, 100, 660, 573);
         contentPane = new JPanel();
