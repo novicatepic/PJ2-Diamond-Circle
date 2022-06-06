@@ -14,9 +14,9 @@ import java.util.*;
 public class GameMatrix {
 
     public static final Integer NUMBER_OF_FIGURES = 4;
-    private static int MATRIX_DIMENSIONS;
+    private static final int MATRIX_DIMENSIONS = 7;
     private static Object[][] MATRIX;
-    private static int NUMBER_OF_PLAYERS;
+    private static int NUMBER_OF_PLAYERS = 2;
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
@@ -25,8 +25,14 @@ public class GameMatrix {
     ArrayList<String> coloursList = new ArrayList<>(Arrays.asList(colours));
 
     GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers, IncorrectColour {
-        MATRIX_DIMENSIONS = loadMatrixDimensions();
-        NUMBER_OF_PLAYERS = loadNumberOfPlayers();
+        if(MATRIX_DIMENSIONS < 7 || MATRIX_DIMENSIONS > 10) {
+            throw new InvalidMatrixDimension();
+        }
+        if(NUMBER_OF_PLAYERS < 2 || NUMBER_OF_PLAYERS > 4) {
+            throw new InvalidNumberOfPlayers();
+        }
+        //MATRIX_DIMENSIONS = loadMatrixDimensions();
+        //NUMBER_OF_PLAYERS = loadNumberOfPlayers();
         MATRIX = new Object[MATRIX_DIMENSIONS][MATRIX_DIMENSIONS];
         putIntegersToMatrix();
         PathClass pathClass = new PathClass(MATRIX, MATRIX_DIMENSIONS);
@@ -43,22 +49,32 @@ public class GameMatrix {
     public static Object[][] getMATRIX() {
         return MATRIX;
     }
+
     public static int getMatrixDimensions() {
         return MATRIX_DIMENSIONS;
     }
+
     public static ArrayList<Object> getMapTraversal() {
         return mapTraversal;
     }
+
     public static ArrayList<Object> getOriginalMap() {
         return originalMap;
     }
-    public static Player[] getPlayers() { return players; }
-    public static int getNumberOfPlayers() { return NUMBER_OF_PLAYERS; }
+
+    public static Player[] getPlayers() {
+        return players;
+    }
+
+    public static int getNumberOfPlayers() {
+        return NUMBER_OF_PLAYERS;
+    }
+
     public static void setMapTraversal(int positon, Object element) {
         mapTraversal.set(positon, element);
     }
 
-    private int loadMatrixDimensions() throws InvalidMatrixDimension {
+    /*private int loadMatrixDimensions() throws InvalidMatrixDimension {
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter matrix dimension (7, 8, 9 or 10): ");
         String userInput = scanner.nextLine();
@@ -76,7 +92,7 @@ public class GameMatrix {
             throw new InvalidNumberOfPlayers();
         }
         return Integer.parseInt(userInput);
-    }
+    }*/
 
     private Figure[] generateFigures() throws IncorrectColour {
         Random random = new Random();

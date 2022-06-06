@@ -2,26 +2,41 @@ package figure;
 
 import bonus.Bonus;
 import bonus.Diamond;
+import game.Game;
+import gui.FileForm;
 import hole.Hole;
 import game.GameMatrix;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GhostFigure extends Thread {
     private Diamond[] diamonds;
     private int numberOfDiamonds;
     private List<Integer> randomPositions;
-
+    private static Handler ghostHandler;
     private boolean isGhostAlive = true;
+
+    static {
+        try {
+            ghostHandler = new FileHandler("ghostlog.log");
+            Logger.getLogger(GhostFigure.class.getName()).addHandler(ghostHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public GhostFigure() {
         super();
         Random random = new Random();
         do {
-                //System.out.println("GHOST: " + GameMatrix.getNumberOfFreePositionsInMatrix());
             numberOfDiamonds = random.nextInt(GameMatrix.getMatrixDimensions() - 2) + 2;
         } while (numberOfDiamonds > GameMatrix.getNumberOfFreePositionsInMatrix() &&
                 GameMatrix.getNumberOfFreePositionsInMatrix() >= 2);
@@ -55,16 +70,24 @@ public class GhostFigure extends Thread {
                     //System.out.println("GHOST");
                     Integer randomPosition = randomPositions.get(i);
                     Bonus bonus = new Diamond();
+
+                    if(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
+                        System.out.println("FIGURE AUTOMATICALLY PICKED UP BONUS!");
+                        Figure f = (Figure) GameMatrix.getMapTraversal().get(randomPosition);
+                        f.setBonusCount(f.getBonusCount() + 1);
+                    }
+
                     if(!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
                             !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
+                        System.out.println("BONUS SET!");
                         GameMatrix.setMapTraversal(randomPosition, bonus);
-                        sleep(5000);
                     }
                 }
+                sleep(5000);
             }
         }
-        catch(/*InterruptedException*/ Exception ex) {
-            ex.printStackTrace();
+        catch(InterruptedException ex) {
+            Logger.getLogger(GhostFigure.class.getName()).log(Level.WARNING, ex.toString());
         }
     }
 

@@ -9,6 +9,7 @@ abstract public class Figure {
     private String colour;
     private int position;
     private long time;
+    private int bonusCount = 0;
 
     public Figure() {
         position = 0;
@@ -75,5 +76,13 @@ abstract public class Figure {
 
     public boolean didFigureFinish() {
         return (position == GameMatrix.getMapTraversal().size());
+    }
+
+    public int getBonusCount() {
+        return bonusCount;
+    }
+
+    public void setBonusCount(int bonusCount) {
+        this.bonusCount = bonusCount;
     }
 }

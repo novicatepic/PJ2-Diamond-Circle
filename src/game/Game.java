@@ -4,7 +4,6 @@ import FigureInterface.IDroppable;
 import FigureInterface.IFly;
 import FigureInterface.SuperFast;
 import bonus.Bonus;
-import bonus.Diamond;
 import cards.Card;
 import cards.Deck;
 import cards.SimpleCard;
@@ -17,7 +16,6 @@ import pair.Pair;
 import player.Player;
 
 import java.awt.*;
-import java.awt.event.WindowEvent;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -30,17 +28,13 @@ import java.util.logging.Handler;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-public class Game /*extends Thread*/ {
+public class Game {
 
     public boolean pause = false;
     private GhostFigure ghostFigure;
-    public static Handler handler;
+    private static Handler handler;
     private boolean isItOverFlag = false;
     private Player[] randomizedPlayers;
-    private Player currentPlayer;
-    private int fullPosition;
-    private int currentFigureNumber;
-    private int positionToGoTo = 0;
     private MainFrame mainFrame;
     private static final int MAX_NUM_OF_GAMES = 100;
 
@@ -48,6 +42,8 @@ public class Game /*extends Thread*/ {
         try {
             handler = new FileHandler("game.log");
             Logger.getLogger(Game.class.getName()).addHandler(handler);
+            /*.getLogger(MainFrame.class.getName()).addHandler(handler);
+            Logger.getLogger(FileForm.class.getName()).addHandler(handler);*/
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -90,47 +86,26 @@ public class Game /*extends Thread*/ {
     }
 
     public static void main(String[] args) {
-        /*try {
-            new GameMatrix();
-        } catch(Exception e1) {
-            Logger.getLogger(Game.class.getName()).log(Level.WARNING, e1.fillInStackTrace().toString());
-        }*/
-
-        /*System.out.println("Game is about to start, if you want to pause it, input PAUSE, if you want to continue" +
-                "input CONTINUE, if you want to end input --exit");
-        Game diamondCircle = new Game();
-        diamondCircle.randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
-        diamondCircle.mainFrame = new MainFrame(diamondCircle);
-        MainFrame.setGamesPlayed(0);
-        diamondCircle.mainFrame.setVisible(true);
-        diamondCircle.start();*/
-
         Game[] games = new Game[MAX_NUM_OF_GAMES];
         for(int i = 0; i < games.length; i++) {
             try {
                 new GameMatrix();
-            } catch (Exception e) {
-                e.printStackTrace();
+                games[i] = new Game();
+                games[i].randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
+                games[i].mainFrame = new MainFrame(games[i]);
+                if(i == 0) {
+                    MainFrame.setGamesPlayed(0);
+                }
+                else {
+                    MainFrame.setGamesPlayed(MainFrame.getGamesPlayed() + 1);
+                }
+                games[i].mainFrame.setVisible(true);
+                games[i].run();
+                games[i].mainFrame.setVisible(false);
+                games[i].mainFrame.dispose();
+            } catch (Exception ex) {
+                log(ex);
             }
-
-            System.out.println("i" + i);
-            if(i > 0) {
-                System.out.println("1");
-            }
-
-            games[i] = new Game();
-            games[i].randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
-            games[i].mainFrame = new MainFrame(games[i]);
-            if(i == 0) {
-                MainFrame.setGamesPlayed(0);
-            }
-            else {
-                MainFrame.setGamesPlayed(MainFrame.getGamesPlayed() + 1);
-            }
-            games[i].mainFrame.setVisible(true);
-            games[i].run();
-            games[i].mainFrame.setVisible(false);
-            games[i].mainFrame.dispose();
         }
     }
 
@@ -164,13 +139,13 @@ public class Game /*extends Thread*/ {
                             wait();
                         }
                     }
-                    currentPlayer = randomizedPlayers[i];
+                    Player currentPlayer = randomizedPlayers[i];
                     if (getWhichFigureIsPlayerPlayingWith(list, i, currentPlayer) != -1) {
                         //System.out.println("RANDOMIZED PLAYERS: " + randomizedPlayers[i].getName());
                         //System.out.println("FIGURE: " + getWhichFigureIsPlayerPlayingWith(list, i, randomizedPlayers[i]));
                         try {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(list, i, currentPlayer);
-                            currentFigureNumber = whichFigure;
+                            int currentFigureNumber = whichFigure;
                             if (helpBool) {
                                 ghostFigure = new GhostFigure();
                                 ghostFigure.start();
@@ -199,8 +174,8 @@ public class Game /*extends Thread*/ {
                                 }
                             }
                         } catch (InterruptedException ex) {
-                            Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
-                            ex.printStackTrace();
+                            log(ex);
+                            //ex.printStackTrace();
                         }
                         //printFigures();
                     }
@@ -210,12 +185,12 @@ public class Game /*extends Thread*/ {
             try {
                 writeToFiles(startTime, randomizedPlayers, figureMap);
             } catch (IOException ex) {
-                Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
-                ex.printStackTrace();
+                log(ex);
+                //ex.printStackTrace();
             }
         } catch (Exception ex) {
-            //Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
-            ex.printStackTrace();
+            log(ex);
+            //ex.printStackTrace();
         }
     }
 
@@ -243,7 +218,7 @@ public class Game /*extends Thread*/ {
     private boolean processSimpleCard(Player[] randomizedPlayers, ArrayList<HashMap<Player, Integer>> list, HashMap<Figure,
             String> figureMap, int i, int whichFigure, SimpleCard card) throws InterruptedException {
 
-        positionToGoTo = card.getNumberOfFieldsToCross();
+        int positionToGoTo = card.getNumberOfFieldsToCross();
         int playerPosition;
         synchronized (randomizedPlayers[i].getFigures()[whichFigure]) {
             playerPosition = randomizedPlayers[i].getFigures()[whichFigure].getPosition();
@@ -253,11 +228,11 @@ public class Game /*extends Thread*/ {
         if (randomizedPlayers[i].getFigures()[whichFigure] instanceof SuperFast) {
             positionToGoTo *= 2;
         }
-        fullPosition = playerPosition + positionToGoTo + randomizedPlayers[i].getBonusCount();
-        randomizedPlayers[i].setBonusCount(0);
+        int fullPosition = playerPosition + positionToGoTo + randomizedPlayers[i].getFigures()[whichFigure].getBonusCount();
+        System.out.println("BONUS COUNT: " + randomizedPlayers[i].getFigures()[whichFigure].getBonusCount());
+        randomizedPlayers[i].getFigures()[whichFigure].setBonusCount(0);
         if (fullPosition >= GameMatrix.getMapTraversal().size()) fullPosition = GameMatrix.getMapTraversal().size() - 1;
-
-        String labelText = "Na potezu je igrac " + i + "., Figura " + whichFigure + ", prelazi " + fullPosition + "" +
+        String labelText = "Na potezu je igrac " + i + "., Figura " + whichFigure + ", prelazi " + (fullPosition - playerPosition) + "" +
                 "polja, pomjera se sa pozicije " + GameMatrix.getOriginalMap().get(playerPosition) + " na " +
                 GameMatrix.getOriginalMap().get(fullPosition) + ".";
         mainFrame.setCurrCardLabel(labelText);
@@ -285,7 +260,8 @@ public class Game /*extends Thread*/ {
 
             if (pos < GameMatrix.getMapTraversal().size() && GameMatrix.getMapTraversal().get(pos) instanceof Bonus) {
                 GameMatrix.setMapTraversal(pos, null);
-                randomizedPlayers[i].setBonusCount(randomizedPlayers[i].getBonusCount() + 1);
+                System.out.println("BONUS PICKED UP!");
+                randomizedPlayers[i].getFigures()[whichFigure].setBonusCount(randomizedPlayers[i].getFigures()[whichFigure].getBonusCount() + 1);
                 Thread.sleep(1000);
             }
             if (pos == GameMatrix.getMapTraversal().size() - 1) {
@@ -303,8 +279,8 @@ public class Game /*extends Thread*/ {
                 Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(GameMatrix.getOriginalMap().size() - 1);
                 Integer element = (Integer)GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
                 mainFrame.setMatrixLabel(Color.MAGENTA, oldMatrixPosition, String.valueOf(element));
-
                 Thread.sleep(1000);
+                mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
                 return true;
             }
             if (pos < GameMatrix.getMapTraversal().size()) {
@@ -408,6 +384,10 @@ public class Game /*extends Thread*/ {
                 GameMatrix.setMapTraversal(i, null);
             }
         }
+    }
+
+    private static void log(Exception ex) {
+        Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());
     }
 
     /*private void printFigures() {

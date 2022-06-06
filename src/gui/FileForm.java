@@ -1,5 +1,7 @@
 package gui;
 
+import game.Game;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
@@ -8,11 +10,26 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.logging.FileHandler;
+import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class FileForm extends JFrame {
 
     private JPanel contentPane;
     private ArrayList<String> listOfFiles = new ArrayList<>();
+    private static final String CURRENT_PATH = "./";
+    private static Handler fileFormHandler;
+
+    static {
+        try {
+            fileFormHandler = new FileHandler("fileform.log");
+            Logger.getLogger(FileForm.class.getName()).addHandler(fileFormHandler);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public FileForm() {
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -44,7 +61,7 @@ public class FileForm extends JFrame {
                         File openFile = new File(button.getText());
                         Desktop.getDesktop().open(openFile);
                     } catch (IOException ex) {
-                        ex.printStackTrace();
+                        log(ex.fillInStackTrace());
                     }
                 }
             });
@@ -53,14 +70,22 @@ public class FileForm extends JFrame {
 
     private int getNumberOfFilesOfGamesFinished() {
         int returnCounter = 0;
-        File currentPath = new File("./");
+        File currentPath = new File(CURRENT_PATH);
         File[] files = currentPath.listFiles();
-        for(File f : files) {
-            if(f != null && !f.isDirectory() && f.getName().contains("IGRA")) {
-                listOfFiles.add(f.getName());
-                returnCounter++;
+        try {
+            for(File f : files) {
+                if(f != null && !f.isDirectory() && f.getName().contains("IGRA")) {
+                    listOfFiles.add(f.getName());
+                    returnCounter++;
+                }
             }
+        } catch (NullPointerException nex) {
+            log(nex.fillInStackTrace());
         }
         return returnCounter;
+    }
+
+    private void log(Throwable ex) {
+        Logger.getLogger(FileForm.class.getName()).log(Level.WARNING, ex.toString());
     }
 }

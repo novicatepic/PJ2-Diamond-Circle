@@ -47,8 +47,8 @@ public class Deck {
                             simple++;
                         }
                         break;
-                    default:
-                        System.out.println("Entered default!");
+                    /*default:
+                        System.out.println("Entered default!");*/
                 }
             }
             else if(!nextBoolean && special != NUMBER_OF_SPECIAL_CARDS){
@@ -56,17 +56,6 @@ public class Deck {
                 special++;
             }
         }
-        /*for(int i = 0; i < 52; i++) {
-            CardPicture picture = new CardPicture();
-            int whichCard = random.nextInt(52);
-            if(whichCard >= 39) {
-                cards[i] = new SpecialCard(picture);
-            }
-            else {
-                int randomNumberOfFields = random.nextInt(5) + 1;
-                cards[i] = new SimpleCard(picture, randomNumberOfFields);
-            }
-        }*/
     }
 
     public Card pullOutACard() {
