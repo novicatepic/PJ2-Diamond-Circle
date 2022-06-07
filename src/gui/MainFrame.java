@@ -1,13 +1,20 @@
 package gui;
 
+import figure.Figure;
+import figure.GhostFigure;
 import game.Game;
 import game.GameMatrix;
 import pair.Pair;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.image.BufferedImage;
+import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.util.logging.FileHandler;
 import java.util.logging.Handler;
@@ -18,7 +25,7 @@ public class MainFrame extends JFrame {
     private final JPanel mainPane;
     private final JLabel lbWelcome;
     private JPanel matrixPanel;
-    private final JLabel[][] matrixLabels = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
+    private static final JLabel[][] matrixLabels = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
     private final JButton[] playerButtons = new JButton[16];
     private final JLabel currCardLabel;
     private final JLabel cardDescLabel;
@@ -27,6 +34,9 @@ public class MainFrame extends JFrame {
     private static JLabel labelGamesPlayed;
     private final JPanel[] squarePanels = new JPanel[4];
     private static Handler frameHandler;
+    private Game game = new Game();
+    private GhostFigure ghostFigure;
+    private Thread timeThread = new Thread();
 
     static {
         try {
@@ -46,36 +56,93 @@ public class MainFrame extends JFrame {
         labelGamesPlayed.setText(gamesPlayed + " odigranih igara!");
     }
 
-    private Game game = new Game();
-
     public void setCardDescLabel(String text) {
         cardDescLabel.setText(text);
     }
 
     public void setCardPicLabel(String cardType, int value) {
-        //System.out.println("VALUE: " + value);
-
         for(JPanel panel : squarePanels) {
             panel.setBackground(Color.WHITE);
         }
 
         if("special".equals(cardType)) {
-            ImageIcon imageIcon = new ImageIcon("specialcard.jpg");
-            cardPicLabel.setIcon(imageIcon);
+            BufferedImage img = null;
+            shrinkingAndPuttingImage(img, "specialcard.jpg");
         }
         else if("simple".equals(cardType)) {
-            ImageIcon imageIcon = new ImageIcon("simplecard.jpg");
-            cardPicLabel.setIcon(imageIcon);
+            BufferedImage img = null;
+            shrinkingAndPuttingImage(img, "simplecard.jpg");
         }
 
         for(int i = 0; i < value; i++) {
             squarePanels[i].setBackground(Color.BLACK);
         }
+    }
 
+    private void shrinkingAndPuttingImage(BufferedImage img, String imageName) {
+        try {
+            img = ImageIO.read(new File(imageName));
+            Image dimg = img.getScaledInstance(cardPicLabel.getWidth(), cardPicLabel.getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon imageIcon = new ImageIcon(dimg);
+            cardPicLabel.setIcon(imageIcon);
+        } catch (IOException e) {
+            processException(e);
+        }
     }
 
     public void setCurrCardLabel(String text) {
         currCardLabel.setText(text);
+    }
+
+    public static void setBonusLabel(int position) {
+        System.out.println("SET BONUS LABEL!");
+        Pair pair = GameMatrix.getMatrixPositionOfElement(position);
+        int xCoordinate = pair.getX();
+        int yCoordinate = pair.getY();
+
+        try {
+            BufferedImage img = ImageIO.read(new File("diamond.png"));
+            Image dimg = img.getScaledInstance(matrixLabels[xCoordinate][yCoordinate].getWidth(),
+                    matrixLabels[xCoordinate][yCoordinate].getHeight(), Image.SCALE_SMOOTH);
+            ImageIcon imageIcon = new ImageIcon(dimg);
+            matrixLabels[xCoordinate][yCoordinate].setIcon(imageIcon);
+
+            /*if(wasFigure && rememberFigure != null) {
+                try {
+                    Thread.sleep(1000);
+                    matrixLabels[xCoordinate][yCoordinate].setIcon(null);
+                    matrixLabels[xCoordinate][yCoordinate].setText(rememberFigure.checkTypeOfFigure());
+                    matrixLabels[xCoordinate][yCoordinate].setBackground(Color.WHITE);
+                    matrixLabels[xCoordinate][yCoordinate].setForeground(Color.BLACK);
+                } catch (InterruptedException ex) {
+                    processException(ex);
+                }
+            }*/
+
+        } catch (IOException e) {
+            processException(e);
+        }
+    }
+
+    public void setBonusPickedUp(Pair pair, Figure figure) {
+        int xCoordinate = pair.getX();
+        int yCoordinate = pair.getY();
+        matrixLabels[xCoordinate][yCoordinate].setIcon(null);
+        matrixLabels[xCoordinate][yCoordinate].setText(figure.checkTypeOfFigure());
+        matrixLabels[xCoordinate][yCoordinate].setBackground(Color.WHITE);
+        matrixLabels[xCoordinate][yCoordinate].setForeground(figure.getRealColour());
+    }
+
+    public static void clearBonuses() {
+        for(int i = 0; i < GameMatrix.getMatrixDimensions(); i++) {
+            for(int j = 0; j < GameMatrix.getMatrixDimensions(); j++) {
+                if(matrixLabels[i][j].getIcon() != null) {
+                    matrixLabels[i][j].setIcon(null);
+                    matrixLabels[i][j].setText(String.valueOf((Integer)GameMatrix.getMATRIX()[i][j]));
+                    matrixLabels[i][j].setBackground(Color.WHITE);
+                }
+            }
+        }
     }
 
     public void setMatrixLabel(Color color, Pair pair, String newLabelString) {
@@ -83,14 +150,7 @@ public class MainFrame extends JFrame {
         int yCoordinate = pair.getY();
         //matrixLabels[xCoordinate][yCoordinate].setBackground(color);
         if("H".equals(newLabelString)) {
-            matrixLabels[xCoordinate][yCoordinate].setOpaque(true);
             matrixLabels[xCoordinate][yCoordinate].setBackground(color);
-            try {
-                Thread.sleep(1000);
-            } catch (Exception e) {
-                processException(e);
-            }
-            matrixLabels[xCoordinate][yCoordinate].setBackground(Color.WHITE);
             if(!"FF".equals(matrixLabels[xCoordinate][yCoordinate].getText())) {
                 matrixLabels[xCoordinate][yCoordinate].setForeground(Color.BLACK);
                 matrixLabels[xCoordinate][yCoordinate].setText(String.valueOf((Integer)GameMatrix.getMATRIX()[xCoordinate][yCoordinate]));
@@ -105,15 +165,23 @@ public class MainFrame extends JFrame {
     public void clearHoles() {
         for(int i = 0; i < GameMatrix.getMatrixDimensions(); i++) {
             for(int j = 0; j < GameMatrix.getMatrixDimensions(); j++) {
-                if(matrixLabels[i][j].getText() != null && matrixLabels[i][j].getText().equals("H")) {
-                    matrixLabels[i][j].setText(String.valueOf(i * GameMatrix.getMatrixDimensions() + j + 1));
+                if(matrixLabels[i][j].getIcon() == null) {
+                    matrixLabels[i][j].setBackground(Color.WHITE);
                 }
             }
         }
     }
 
-    public MainFrame(Game game) {
+    public void eatBonus(int position) {
+        Pair pair = GameMatrix.getMatrixPositionOfElement(position);
+        matrixLabels[pair.getX()][pair.getY()].setIcon(null);
+        matrixLabels[pair.getX()][pair.getY()].setText(String.valueOf((Integer)GameMatrix.getMATRIX()[pair.getX()][pair.getY()]));
+        matrixLabels[pair.getX()][pair.getY()].setBackground(Color.BLACK);
+    }
+
+    public MainFrame(Game game, GhostFigure ghostFigure) {
         this.game = game;
+        this.ghostFigure = ghostFigure;
 
         setTitle("DIAMOND CIRCLE GAME");
         //was exit on close
@@ -151,7 +219,13 @@ public class MainFrame extends JFrame {
                     game.pause = false;
                     try {
                         synchronized (game) {
-                            game.notify();
+                            synchronized (ghostFigure) {
+                                synchronized (timeThread) {
+                                    ghostFigure.notify();
+                                    game.notify();
+                                    //timeThread.notify();
+                                }
+                            }
                         }
                     } catch (Exception ex) {
                         processException(ex);
@@ -285,7 +359,7 @@ public class MainFrame extends JFrame {
         timePlayedLabel.setBounds(516, 10, 184, 32);
         mainPane.add(timePlayedLabel);
 
-        new Thread(new Runnable() {
+        timeThread = new Thread(new Runnable() {
             @Override
             public void run() {
                 long start = System.currentTimeMillis();
@@ -295,9 +369,24 @@ public class MainFrame extends JFrame {
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
+                            /*if(Game.pause) {
+                                synchronized (timeThread) {
+                                    try {
+                                        wait();
+                                    } catch (InterruptedException exc) {
+                                        //exc.printStackTrace();
+                                        processException(exc);
+                                    }
+                                }
+                            }*/
+
+                            //long start = System.currentTimeMillis();
+                            //long time = System.currentTimeMillis() - start;
+                            //long seconds = time / 1000;
                             currCardLabel.setText(currCardLabel.getText());
                             timePlayedLabel.setText("Vrijeme: " + seconds);
                         }
+
                     });
                     try {
                         Thread.sleep(1000);
@@ -306,7 +395,8 @@ public class MainFrame extends JFrame {
                     }
                 }
             }
-        }).start();
+        });
+        timeThread.start();
 
         JPanel panel = new JPanel();
         panel.setBounds(10, 201, 38, 46);
@@ -333,7 +423,7 @@ public class MainFrame extends JFrame {
         }
     }
 
-    private void processException(Exception e) {
+    private static void processException(Exception e) {
         Logger.getLogger(MainFrame.class.getName()).log(Level.WARNING, e.fillInStackTrace().toString());
     }
 

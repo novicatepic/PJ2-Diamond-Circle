@@ -30,30 +30,76 @@ import java.util.logging.Logger;
 
 public class Game {
 
-    public boolean pause = false;
-    private GhostFigure ghostFigure;
+    public static boolean pause = false;
+    private static GhostFigure ghostFigure;
     private static Handler handler;
     private boolean isItOverFlag = false;
     private Player[] randomizedPlayers;
-    private MainFrame mainFrame;
+    private static MainFrame mainFrame;
     private static final int MAX_NUM_OF_GAMES = 100;
+    private static Game[] games;
+    private static int i;
 
     static {
         try {
             handler = new FileHandler("game.log");
             Logger.getLogger(Game.class.getName()).addHandler(handler);
-            /*.getLogger(MainFrame.class.getName()).addHandler(handler);
-            Logger.getLogger(FileForm.class.getName()).addHandler(handler);*/
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public Game() {
+        ghostFigure = new GhostFigure();
+    }
+
+    public static Game[] getGames() {
+        return games;
+    }
+
+    public GhostFigure getGhostFigure() {
+        return ghostFigure;
+    }
+
+    public static int getI() {
+        return i;
     }
 
     public Player[] getRandomizedPlayers() {
         return randomizedPlayers;
     }
 
+    public static MainFrame getMainFrame() {
+        return mainFrame;
+    }
+
+
+    public static void main(String[] args) {
+        games = new Game[MAX_NUM_OF_GAMES];
+        for (i = 0; i < games.length; i++) {
+            try {
+                new GameMatrix();
+                games[i] = new Game();
+                games[i].randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
+                mainFrame = new MainFrame(games[i], ghostFigure);
+                //ghostFigure.start();
+                if (i == 0) {
+                    MainFrame.setGamesPlayed(0);
+                } else {
+                    MainFrame.setGamesPlayed(MainFrame.getGamesPlayed() + 1);
+                }
+                mainFrame.setVisible(true);
+                games[i].run();
+                mainFrame.setVisible(false);
+                mainFrame.dispose();
+            } catch (Exception ex) {
+                log(ex);
+            }
+        }
+    }
+
     private boolean checkIfAllKeysAreEmpty(ArrayList<HashMap<Player, Integer>> list, Player[] randomizedPlayers) {
+        System.out.println("CHECK KEYS");
         for (HashMap<Player, Integer> elem : list) {
             for (Player p : randomizedPlayers) {
                 if (!elem.containsKey(p)) {
@@ -68,6 +114,7 @@ public class Game {
     }
 
     private int getWhichFigureIsPlayerPlayingWith(ArrayList<HashMap<Player, Integer>> list, int pos, Player p) {
+        System.out.println("FIGURE");
         HashMap<Player, Integer> map = list.get(pos);
         int value = map.get(p);
         switch (value) {
@@ -85,30 +132,6 @@ public class Game {
         }
     }
 
-    public static void main(String[] args) {
-        Game[] games = new Game[MAX_NUM_OF_GAMES];
-        for(int i = 0; i < games.length; i++) {
-            try {
-                new GameMatrix();
-                games[i] = new Game();
-                games[i].randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
-                games[i].mainFrame = new MainFrame(games[i]);
-                if(i == 0) {
-                    MainFrame.setGamesPlayed(0);
-                }
-                else {
-                    MainFrame.setGamesPlayed(MainFrame.getGamesPlayed() + 1);
-                }
-                games[i].mainFrame.setVisible(true);
-                games[i].run();
-                games[i].mainFrame.setVisible(false);
-                games[i].mainFrame.dispose();
-            } catch (Exception ex) {
-                log(ex);
-            }
-        }
-    }
-
     public void run() {
         long startTime = new Date().getTime();
         Deck deck = new Deck();
@@ -120,13 +143,12 @@ public class Game {
         int i = 0;
         try {
             while (!checkIfAllKeysAreEmpty(list, randomizedPlayers)) {
-                while(i != GameMatrix.getNumberOfPlayers()) {
-                    if(isItOverFlag) {
-                        if(i != GameMatrix.getNumberOfPlayers() - 1) {
+                while (i != GameMatrix.getNumberOfPlayers()) {
+                    if (isItOverFlag) {
+                        if (i != GameMatrix.getNumberOfPlayers() - 1) {
                             i++;
                             isItOverFlag = false;
-                        }
-                        else {
+                        } else {
                             ghostFigure.setGhostAlive();
                             ghostFigure.join();
                             break;
@@ -134,7 +156,7 @@ public class Game {
                     }
                     long figureTimeStart = new Date().getTime();
                     long figureTimeFinish = 0;
-                    if(pause) {
+                    if (pause) {
                         synchronized (this) {
                             wait();
                         }
@@ -147,7 +169,7 @@ public class Game {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(list, i, currentPlayer);
                             int currentFigureNumber = whichFigure;
                             if (helpBool) {
-                                ghostFigure = new GhostFigure();
+                                //ghostFigure = new GhostFigure();
                                 ghostFigure.start();
                                 helpBool = false;
                             }
@@ -158,6 +180,7 @@ public class Game {
                                 String cardDescription = "SPECIAL";
                                 mainFrame.setCardDescLabel(cardDescription);
                                 mainFrame.setCardPicLabel("special", 0);
+                                System.out.println("SPECIAL");
                                 processSpecialCard(random, i, list, randomizedPlayers);
                                 Thread.sleep(1000);
                             } else if (card instanceof SimpleCard) {
@@ -165,17 +188,15 @@ public class Game {
                                 String cardDescription = String.valueOf("SIMPLE: " + sCard.getNumberOfFieldsToCross());
                                 mainFrame.setCardDescLabel(cardDescription);
                                 mainFrame.setCardPicLabel("simple", sCard.getNumberOfFieldsToCross());
-                                //System.out.println("SIMPLE");
+                                System.out.println("SIMPLE");
                                 if (processSimpleCard(randomizedPlayers, list, figureMap, i, whichFigure, (SimpleCard) card)) {
                                     updateFigureTimeInThread(figureTimeFinish, figureTimeStart, currentPlayer, whichFigure);
-                                }
-                                else {
+                                } else {
                                     updateFigureTimeInThread(figureTimeFinish, figureTimeStart, currentPlayer, whichFigure);
                                 }
                             }
                         } catch (InterruptedException ex) {
                             log(ex);
-                            //ex.printStackTrace();
                         }
                         //printFigures();
                     }
@@ -186,11 +207,9 @@ public class Game {
                 writeToFiles(startTime, randomizedPlayers, figureMap);
             } catch (IOException ex) {
                 log(ex);
-                //ex.printStackTrace();
             }
         } catch (Exception ex) {
             log(ex);
-            //ex.printStackTrace();
         }
     }
 
@@ -229,7 +248,7 @@ public class Game {
             positionToGoTo *= 2;
         }
         int fullPosition = playerPosition + positionToGoTo + randomizedPlayers[i].getFigures()[whichFigure].getBonusCount();
-        System.out.println("BONUS COUNT: " + randomizedPlayers[i].getFigures()[whichFigure].getBonusCount());
+        //System.out.println("BONUS COUNT: " + randomizedPlayers[i].getFigures()[whichFigure].getBonusCount());
         randomizedPlayers[i].getFigures()[whichFigure].setBonusCount(0);
         if (fullPosition >= GameMatrix.getMapTraversal().size()) fullPosition = GameMatrix.getMapTraversal().size() - 1;
         String labelText = "Na potezu je igrac " + i + "., Figura " + whichFigure + ", prelazi " + (fullPosition - playerPosition) + "" +
@@ -239,7 +258,7 @@ public class Game {
 
 
         for (int pos = playerPosition; pos <= fullPosition; pos++) {
-            if(pause) {
+            if (pause) {
                 synchronized (this) {
                     wait();
                 }
@@ -247,20 +266,25 @@ public class Game {
 
             Pair realMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos);
             Color realColour = randomizedPlayers[i].getFigures()[whichFigure].getRealColour();
-            if(pos > playerPosition) {
+            String newLabelString = randomizedPlayers[i].getFigures()[whichFigure].checkTypeOfFigure();
+            if(pos == 0) {
+                mainFrame.setMatrixLabel(realColour, realMatrixPosition, newLabelString);
+            }
+            if (pos > playerPosition) {
                 int oldPos = pos - 1;
                 //System.out.println("Figure removed from pos: " + oldPos);
                 GameMatrix.setMapTraversal(oldPos, null);
                 Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(oldPos);
-                Integer element = (Integer)GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
+                Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
                 mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
-                String newLabelString = randomizedPlayers[i].getFigures()[whichFigure].checkTypeOfFigure();
                 mainFrame.setMatrixLabel(realColour, realMatrixPosition, newLabelString);
             }
 
             if (pos < GameMatrix.getMapTraversal().size() && GameMatrix.getMapTraversal().get(pos) instanceof Bonus) {
                 GameMatrix.setMapTraversal(pos, null);
-                System.out.println("BONUS PICKED UP!");
+                Pair pair = GameMatrix.getMatrixPositionOfElement(pos);
+                mainFrame.setBonusPickedUp(pair, randomizedPlayers[i].getFigures()[whichFigure]);
+                //System.out.println("BONUS PICKED UP!");
                 randomizedPlayers[i].getFigures()[whichFigure].setBonusCount(randomizedPlayers[i].getFigures()[whichFigure].getBonusCount() + 1);
                 Thread.sleep(1000);
             }
@@ -268,7 +292,7 @@ public class Game {
                 GameMatrix.setMapTraversal(randomizedPlayers[i].getFigures()[whichFigure].getPosition(), null);
                 //randomizedPlayers[i].getFigures()[whichFigure].setPosition(GameMatrix.getMapTraversal().size() - 1);
                 list.get(i).replace(randomizedPlayers[i], list.get(i).get(randomizedPlayers[i]) - 1);
-                if(list.get(i).get(randomizedPlayers[i]) == 0) {
+                if (list.get(i).get(randomizedPlayers[i]) == 0) {
                     isItOverFlag = true;
                 }
                 String newString = figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]) + "" +
@@ -277,7 +301,7 @@ public class Game {
                 randomizedPlayers[i].getFigures()[whichFigure].setPosition(pos + 1);
 
                 Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(GameMatrix.getOriginalMap().size() - 1);
-                Integer element = (Integer)GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
+                Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
                 mainFrame.setMatrixLabel(Color.MAGENTA, oldMatrixPosition, String.valueOf(element));
                 Thread.sleep(1000);
                 mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
@@ -295,13 +319,6 @@ public class Game {
                 Thread.sleep(1000);
             }
         }
-        /*if (fullPosition < GameMatrix.getMapTraversal().size()) {
-            synchronized (randomizedPlayers[i].getFigures()[whichFigure]) {
-                GameMatrix.setMapTraversal(randomizedPlayers[i].getFigures()[whichFigure].getPosition(), null);
-                randomizedPlayers[i].getFigures()[whichFigure].setPosition(fullPosition);
-                GameMatrix.setMapTraversal(fullPosition, randomizedPlayers[i].getFigures()[whichFigure]);
-            }
-        }*/
         return false;
     }
 
@@ -314,32 +331,54 @@ public class Game {
         List<Integer> holePositions = new ArrayList<>();
         int temp = generatedNumberOfHoles;
 
-        while (temp > 0) {
-            int position = random.nextInt(GameMatrix.getMapTraversal().size() - 1) + 1;
-            if (!(GameMatrix.getMapTraversal().get(position) instanceof Bonus) &&
-                    position != GameMatrix.getMapTraversal().size() - 1 &&
-                    !holePositions.contains(position)) {
-                holePositions.add(position);
-                temp--;
-            }
-        }
 
-        for(int holePosition : holePositions) {
-            Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(holePosition);
-            Integer element = (Integer)GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
-            mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
-        }
 
-        for (int k = 0; k < holePositions.size(); k++) {
-            if (!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof Bonus)) {
-                if(!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IFly)) {
-                    if(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IDroppable) {
-                        System.out.println("FIGURE EATEN!");
-                        GameMatrix.setMapTraversal(holePositions.get(k), null);
-                        list.get(i).replace(randomizedPlayers[i], list.get(i).get(randomizedPlayers[i]) - 1);
-                        if(list.get(i).get(randomizedPlayers[i]) <= 0) {
-                            isItOverFlag = true;
-                            break;
+        synchronized (this) {
+            synchronized (mainFrame) {
+                synchronized (GameMatrix.getMapTraversal()) {
+                    /*if(temp > GameMatrix.getNumberOfFreePositionsInMatrix()) {
+                        temp = GameMatrix.getNumberOfFreePositionsInMatrix() - 1;
+                    }*/
+
+                    System.out.println("IN SPECIAL");
+                    while (temp > 0) {
+                        System.out.println("IN TEMP");
+                        int position = random.nextInt(GameMatrix.getMapTraversal().size() - 1) + 1;
+                        if (!(GameMatrix.getMapTraversal().get(position) instanceof Bonus) &&
+                                position != GameMatrix.getMapTraversal().size() - 1 &&
+                                !holePositions.contains(position)) {
+                            holePositions.add(position);
+                            //temp--;
+                        }
+                        temp--;
+                    }
+
+                    for (int holePosition : holePositions) {
+                        System.out.println("IN HOLE POS");
+                        Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(holePosition);
+                        Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
+                        if (!(GameMatrix.getMapTraversal().get(holePosition) instanceof Bonus)) {
+                            mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
+                        }
+                        else {
+                            //System.out.println("BONUS EATEN!");
+                            GameMatrix.setMapTraversal(holePositions.get(holePosition), null);
+                        }
+                    }
+
+                    for (int k = 0; k < holePositions.size(); k++) {
+                        if (!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof Bonus)) {
+                            if (!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IFly)) {
+                                if (GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IDroppable) {
+                                    //System.out.println("FIGURE EATEN!");
+                                    GameMatrix.setMapTraversal(holePositions.get(k), null);
+                                    list.get(i).replace(randomizedPlayers[i], list.get(i).get(randomizedPlayers[i]) - 1);
+                                    if (list.get(i).get(randomizedPlayers[i]) <= 0) {
+                                        isItOverFlag = true;
+                                        break;
+                                    }
+                                }
+                            }
                         }
                     }
                 }
@@ -365,11 +404,11 @@ public class Game {
                 pw.println("Igrac " + (outerCounter + 1) + " - " + p.getName() + "\n" +
                         "Figura " + innerCounter++ + " (" + f.checkTypeOfFigure() + ", " + f.getColour() + ") - " +
                         "predjeni put (" + figureMap.get(f) + ") - stigla do cilja " + helpString + "\n" +
-                        "Ukupno vrijeme igranja sa figurom: " + f.getTime() / (double)1000 + "s\n");
+                        "Ukupno vrijeme igranja sa figurom: " + f.getTime() / (double) 1000 + "s\n");
             }
             outerCounter++;
         }
-        pw.println((new Date().getTime() - startTime) / (double)1000 + "s");
+        pw.println((new Date().getTime() - startTime) / (double) 1000 + "s");
         pw.close();
     }
 
@@ -379,8 +418,8 @@ public class Game {
     }
 
     private void removeHoles() {
-        for(int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
-            if(GameMatrix.getMapTraversal().get(i) instanceof Hole) {
+        for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
+            if (GameMatrix.getMapTraversal().get(i) instanceof Hole) {
                 GameMatrix.setMapTraversal(i, null);
             }
         }

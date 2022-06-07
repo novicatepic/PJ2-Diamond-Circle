@@ -7,7 +7,7 @@ import java.awt.*;
 
 abstract public class Figure {
     private String colour;
-    private int position;
+    private int position = 0;
     private long time;
     private int bonusCount = 0;
 
