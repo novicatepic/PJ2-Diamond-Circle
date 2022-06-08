@@ -73,10 +73,15 @@ public class GhostFigure extends Thread {
                 findPositionsForGhost();
                 clearDiamonds();
                 for (int i = 0; i < randomPositions.size(); i++) {
-                    synchronized (Game.getGames()[Game.getI()]) {
+                    synchronized (Game.getGame()/*s()[Game.getI()]*/) {
                         synchronized (Game.getMainFrame()) {
                             Integer randomPosition = randomPositions.get(i);
                             Bonus bonus = new Diamond();
+
+                            if(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
+                                Figure f = (Figure)GameMatrix.getMapTraversal().get(randomPosition);
+                                f.setBonusCount(f.getBonusCount() + 1);
+                            }
 
                             if (!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
                                     !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
@@ -97,7 +102,7 @@ public class GhostFigure extends Thread {
 
                 sleep(5000);
 
-                synchronized (Game.getGames()[Game.getI()]) {
+                synchronized (Game.getGame()/*s()[Game.getI()]*/) {
                     synchronized (Game.getMainFrame()) {
                         synchronized (GameMatrix.getMapTraversal()) {
                             MainFrame.clearBonuses();
@@ -111,7 +116,7 @@ public class GhostFigure extends Thread {
     }
 
     private void clearDiamonds() {
-        synchronized (Game.getGames()[Game.getI()]) {
+        synchronized (Game.getGame()/*s()[Game.getI()*/) {
             synchronized (Game.getMainFrame()) {
                 synchronized (GameMatrix.getMapTraversal()) {
                     for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {

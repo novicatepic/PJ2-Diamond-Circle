@@ -16,7 +16,7 @@ public class GameMatrix {
     public static final Integer NUMBER_OF_FIGURES = 4;
     private static final int MATRIX_DIMENSIONS = 7;
     private static Object[][] MATRIX;
-    private static int NUMBER_OF_PLAYERS = 2;
+    private static int NUMBER_OF_PLAYERS = 4;
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();

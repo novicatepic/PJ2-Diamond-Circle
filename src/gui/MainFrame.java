@@ -28,18 +28,15 @@ public class MainFrame extends JFrame {
     private static JLabel currCardLabel;
     private final JLabel cardDescLabel;
     private final JLabel cardPicLabel;
-    private static int gamesPlayed = 0;
-    private static JLabel labelGamesPlayed;
+    private int gamesPlayed = 0;
+    private static JLabel labelGamesPlayed = new JLabel();
     private final JPanel[] squarePanels = new JPanel[4];
     private static Handler frameHandler;
     private Game game;
     private GhostFigure ghostFigure;
     private static JLabel timePlayedLabel;
     private final RefreshingFormThread refreshingFormThread = new RefreshingFormThread();
-
-    /*static {
-        timePlayedLabel.setText("");
-    }*/
+    private final String workingDirectory = "./";
 
     static {
         try {
@@ -66,13 +63,21 @@ public class MainFrame extends JFrame {
         MainFrame.timePlayedLabel.setText(timePlayedLabelText);
     }
 
-    public static int getGamesPlayed() {
-        return gamesPlayed;
-    }
+    public void setGamesPlayed() {
+        File currentPath = new File(workingDirectory);
+        try {
+            File[] files = currentPath.listFiles();
+            for(File f : files) {
+                if(f != null && !f.isDirectory() && f.getName().contains("IGRA")) {
+                    gamesPlayed++;
+                }
+            }
+            labelGamesPlayed.setText(gamesPlayed + " odigranih igara!");
 
-    public static void setGamesPlayed(int gamesPlayed1) {
-        gamesPlayed = gamesPlayed1;
-        labelGamesPlayed.setText(gamesPlayed + " odigranih igara!");
+        } catch (NullPointerException ex) {
+            processException(ex);
+        }
+
     }
 
     public void setCardDescLabel(String text) {
@@ -201,6 +206,7 @@ public class MainFrame extends JFrame {
     public MainFrame(Game game, GhostFigure ghostFigure) {
         this.game = game;
         this.ghostFigure = ghostFigure;
+        setGamesPlayed();
 
         setTitle("DIAMOND CIRCLE GAME");
         //was exit on close
@@ -216,7 +222,7 @@ public class MainFrame extends JFrame {
         lbWelcome.setBounds(10, 93, 576, 33);
         mainPane.add(lbWelcome);
 
-        labelGamesPlayed = new JLabel();
+        //labelGamesPlayed = new JLabel();
         labelGamesPlayed.setBounds(34, 23, 150, 25);
         mainPane.add(labelGamesPlayed);
 
