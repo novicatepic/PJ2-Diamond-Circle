@@ -95,8 +95,8 @@ public class Game {
                 mainFrame.setVisible(true);
                 //games[i].run();
                 game.run();
-                mainFrame.setVisible(false);
-                mainFrame.dispose();
+                //mainFrame.setVisible(false);
+                //mainFrame.dispose();
             } catch (Exception ex) {
                 log(ex);
             }
@@ -106,9 +106,9 @@ public class Game {
     private boolean checkIfAllKeysAreEmpty(HashMap<Player, Integer> map, Player[] randomizedPlayers) {
         //for (HashMap<Player, Integer> elem : list) {
             for (Player p : randomizedPlayers) {
-                if (!map.containsKey(p)) {
+                /*if (!map.containsKey(p)) {
                     continue;
-                }
+                }*/
                 if (map.get(p) > 0) {
                     return false;
                 }
@@ -199,6 +199,13 @@ public class Game {
                     }
                 }
             }
+            if(ghostFigure.isAlive()) {
+                try {
+                    ghostFigure.join();
+                } catch (InterruptedException ex) {
+                    log(ex);
+                }
+            }
             try {
                 writeToFiles(startTime, randomizedPlayers, figureMap);
             } catch (IOException ex) {
@@ -230,7 +237,6 @@ public class Game {
 
     private boolean processSimpleCard(Player[] randomizedPlayers, HashMap<Player, Integer> map, HashMap<Figure,
             String> figureMap, int i, int whichFigure, SimpleCard card) throws InterruptedException {
-
         int positionToGoTo = card.getNumberOfFieldsToCross();
         int playerPosition;
         synchronized (randomizedPlayers[i].getFigures()[whichFigure]) {
@@ -299,7 +305,7 @@ public class Game {
             }
             if (pos < GameMatrix.getMapTraversal().size()) {
                 if (pos != GameMatrix.getMapTraversal().size() - 1 /*&& (pos == fullPosition || pos == 0)*/) {
-                    if(figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]).contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
+                    if(!figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]).contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
                         String newString = figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]) + "" +
                                 GameMatrix.getOriginalMap().get(pos) + "-";
                         figureMap.replace(randomizedPlayers[i].getFigures()[whichFigure], newString);
