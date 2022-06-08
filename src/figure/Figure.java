@@ -64,13 +64,13 @@ abstract public class Figure {
 
     public String checkTypeOfFigure() {
         if(this instanceof FlyingFigure) {
-            return "FF";
+            return "FLYING";
         }
         else if(this instanceof StandardFigure) {
-            return "SF";
+            return "STANDARD";
         }
         else {
-            return "SF";
+            return "SUPER";
         }
     }
 

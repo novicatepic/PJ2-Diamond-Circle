@@ -37,7 +37,6 @@ public class GhostFigure extends Thread {
 
     public GhostFigure() {
         super();
-        //findPositionsForGhost();
     }
 
     private void findPositionsForGhost() {
@@ -73,31 +72,20 @@ public class GhostFigure extends Thread {
             while (isGhostAlive) {
                 findPositionsForGhost();
                 clearDiamonds();
-                System.out.println("GHOST");
                 for (int i = 0; i < randomPositions.size(); i++) {
                     synchronized (Game.getGames()[Game.getI()]) {
                         synchronized (Game.getMainFrame()) {
-                            //synchronized (GameMatrix.getMapTraversal().get(i)) {
-                                System.out.println("ENTERED LOOP");
-                                Integer randomPosition = randomPositions.get(i);
-                                Bonus bonus = new Diamond();
+                            Integer randomPosition = randomPositions.get(i);
+                            Bonus bonus = new Diamond();
 
-                                /*if (GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
-                                    //System.out.println("FIGURE AUTOMATICALLY PICKED UP BONUS!");
-                                    Figure f = (Figure) GameMatrix.getMapTraversal().get(randomPosition);
-                                    f.setBonusCount(f.getBonusCount() + 1);
-                                    //Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(randomPosition);
-                                    MainFrame.setBonusLabel(randomPosition, true);
-                                }*/
-
-                                if (!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
-                                        !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
-                                    System.out.println("BONUS SET!");
-                                    //Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(randomPosition);
+                            if (!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
+                                    !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
+                                //Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(randomPosition);
+                                if (!MainFrame.checkIfFieldIsBlack(randomPosition)) {
                                     MainFrame.setBonusLabel(randomPosition);
                                     GameMatrix.setMapTraversal(randomPosition, bonus);
                                 }
-                            //}
+                            }
                         }
                     }
                 }
@@ -112,7 +100,6 @@ public class GhostFigure extends Thread {
                 synchronized (Game.getGames()[Game.getI()]) {
                     synchronized (Game.getMainFrame()) {
                         synchronized (GameMatrix.getMapTraversal()) {
-                            System.out.println("MAINFRAME CLEAR");
                             MainFrame.clearBonuses();
                         }
                     }
@@ -124,17 +111,13 @@ public class GhostFigure extends Thread {
     }
 
     private void clearDiamonds() {
-        System.out.println("CLEAR DIAMONDS");
         synchronized (Game.getGames()[Game.getI()]) {
             synchronized (Game.getMainFrame()) {
                 synchronized (GameMatrix.getMapTraversal()) {
                     for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
-                        //synchronized (GameMatrix.getMapTraversal().get(i)) {
-                            if (GameMatrix.getMapTraversal().get(i) instanceof Bonus && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)) {
-                                GameMatrix.setMapTraversal(i, null);
-                            }
-                        //}
-
+                        if (GameMatrix.getMapTraversal().get(i) instanceof Bonus && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)) {
+                            GameMatrix.setMapTraversal(i, null);
+                        }
                     }
                 }
             }
