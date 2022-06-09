@@ -1,6 +1,4 @@
 package gui;
-
-import com.sun.tools.javac.Main;
 import game.Game;
 import java.io.IOException;
 import java.util.logging.FileHandler;
@@ -14,7 +12,6 @@ public class RefreshingFormThread extends Thread {
     private long accumulatedSeconds;
     private long accumulatedSecondsHelper;
     private static Handler handler;
-    static int i = 0;
 
     static {
         try {
@@ -27,10 +24,6 @@ public class RefreshingFormThread extends Thread {
 
     public RefreshingFormThread() {
         super();
-        i++;
-        if(i == 2) {
-            System.out.println("2");
-        }
         start = System.currentTimeMillis();
         accumulatedSeconds = 0;
         accumulatedSecondsHelper = 0;

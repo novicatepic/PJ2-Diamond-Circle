@@ -16,7 +16,7 @@ public class GameMatrix {
     public static final Integer NUMBER_OF_FIGURES = 4;
     private static final int MATRIX_DIMENSIONS = 7;
     private static Object[][] MATRIX;
-    private static int NUMBER_OF_PLAYERS = 2;
+    private static final int NUMBER_OF_PLAYERS = 2;
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
@@ -96,7 +96,7 @@ public class GameMatrix {
 
     private Figure[] generateFigures() throws IncorrectColour {
         Random random = new Random();
-        String colour = null;
+        String colour;
         Figure[] resultFigures = new Figure[NUMBER_OF_FIGURES];
         int randomColour = random.nextInt(coloursList.size());
         colour = coloursList.get(randomColour);

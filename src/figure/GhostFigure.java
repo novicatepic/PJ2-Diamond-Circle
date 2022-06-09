@@ -3,12 +3,9 @@ package figure;
 import bonus.Bonus;
 import bonus.Diamond;
 import game.Game;
-import gui.FileForm;
 import gui.MainFrame;
 import hole.Hole;
 import game.GameMatrix;
-import pair.Pair;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -20,8 +17,6 @@ import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GhostFigure extends Thread {
-    private Diamond[] diamonds;
-    private int numberOfDiamonds;
     private List<Integer> randomPositions;
     private static Handler ghostHandler;
     private boolean isGhostAlive = true;
@@ -40,6 +35,7 @@ public class GhostFigure extends Thread {
     }
 
     private void findPositionsForGhost() {
+        int numberOfDiamonds;
         Random random = new Random();
         do {
             numberOfDiamonds = random.nextInt(GameMatrix.getMatrixDimensions() - 2) + 2;
@@ -116,7 +112,7 @@ public class GhostFigure extends Thread {
     }
 
     private void clearDiamonds() {
-        synchronized (Game.getGame()/*s()[Game.getI()*/) {
+        synchronized (Game.getGame()) {
             synchronized (Game.getMainFrame()) {
                 synchronized (GameMatrix.getMapTraversal()) {
                     for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {

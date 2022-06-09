@@ -1,9 +1,7 @@
 package gui;
-
-import game.Game;
-
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,11 +14,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class FileForm extends JFrame {
-
-    private JPanel contentPane;
-    private ArrayList<String> listOfFiles = new ArrayList<>();
+    private final ArrayList<String> listOfFiles = new ArrayList<>();
     private static final String CURRENT_PATH = "./";
     private static Handler fileFormHandler;
+    private final JButton[] buttons;
 
     static {
         try {
@@ -32,15 +29,22 @@ public class FileForm extends JFrame {
     }
 
     public FileForm() {
+        final JPanel contentPane;
+        final JTable table;
+        final JScrollPane scrollPane;
+        final String[] columns;
+        final Object[][] data;
+
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setResizable(false);
         setBounds(100, 100, 733, 584);
+        setTitle("FILES");
         contentPane = new JPanel();
-        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(contentPane);
+        contentPane.setLayout(new BorderLayout());
+        getContentPane().add(contentPane);
+
         int numberOfGames = getNumberOfFilesOfGamesFinished();
-        contentPane.setLayout(new GridLayout(numberOfGames, 1));
-        JButton[] buttons = new JButton[numberOfGames];
+        buttons = new JButton[numberOfGames];
         for(int k = 0; k < buttons.length; k++) {
             buttons[k] = new JButton();
         }
@@ -48,10 +52,28 @@ public class FileForm extends JFrame {
         for(String fileString : listOfFiles) {
             if(fileString != null) {
                 buttons[i].setText(fileString);
-                contentPane.add(buttons[i]);
                 i++;
             }
         }
+
+        columns = new String[] {"RB", "NAZIV_FAJLA", "KLIK"};
+
+        data = new String[numberOfGames][3];
+        for(int k = 0; k < numberOfGames; k++) {
+            data[k][0] = "File " + (k + 1);
+        }
+        for(int k = 0; k < numberOfGames; k++) {
+            data[k][1] = buttons[k].getText();
+        }
+
+        DefaultTableModel model = new DefaultTableModel(data, columns);
+        table = new JTable();
+        table.setModel(model);
+        table.getColumn("KLIK").setCellRenderer(new ButtonRenderer());
+        table.getColumn("KLIK").setCellEditor(new ButtonEditor(new JCheckBox()));
+        scrollPane = new JScrollPane(table);
+        contentPane.add(scrollPane, BorderLayout.CENTER);
+
 
         for(JButton button : buttons) {
             button.addActionListener(new ActionListener() {
@@ -60,11 +82,34 @@ public class FileForm extends JFrame {
                     try {
                         File openFile = new File(button.getText());
                         Desktop.getDesktop().open(openFile);
+
                     } catch (IOException ex) {
                         log(ex.fillInStackTrace());
                     }
                 }
             });
+        }
+    }
+
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+
+        public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus,
+                                                       int row, int column) {
+            setText(buttons[row].getText());
+            return this;
+        }
+    }
+
+    class ButtonEditor extends DefaultCellEditor {
+        public ButtonEditor(JCheckBox c) {
+            super(c);
+        }
+
+        public Component getTableCellEditorComponent(JTable table, Object value, boolean isSelected, int row, int column) {
+            return buttons[row];
         }
     }
 

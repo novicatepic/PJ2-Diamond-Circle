@@ -36,10 +36,7 @@ public class Game {
     private boolean isItOverFlag = false;
     private Player[] randomizedPlayers;
     private static MainFrame mainFrame;
-    private static final int MAX_NUM_OF_GAMES = 100;
     private static Game game;
-    //private static Game[] games;
-    //private static int i;
     private final String fileName = "./IGRA_";
 
     static {
@@ -59,14 +56,6 @@ public class Game {
         return game;
     }
 
-    /*public static Game[] getGames() {
-        return games;
-    }*/
-
-    /*public static int getI() {
-        return i;
-    }*/
-
     public Player[] getRandomizedPlayers() {
         return randomizedPlayers;
     }
@@ -77,43 +66,28 @@ public class Game {
 
 
     public static void main(String[] args) {
-        //games = new Game[MAX_NUM_OF_GAMES];
         game = new Game();
-        //for (i = 0; i < games.length; i++) {
-            try {
-                new GameMatrix();
-                //games[i] = new Game();
-                //games[i].randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
-                game.randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
-                //mainFrame = new MainFrame(games[i], ghostFigure);
-                mainFrame = new MainFrame(game, ghostFigure);
-                /*if (i == 0) {
-                    MainFrame.setGamesPlayed(0);
-                } else {
-                    MainFrame.setGamesPlayed(MainFrame.getGamesPlayed() + 1);
-                }*/
-                mainFrame.setVisible(true);
-                //games[i].run();
-                game.run();
-                //mainFrame.setVisible(false);
-                //mainFrame.dispose();
-            } catch (Exception ex) {
-                log(ex);
-            }
-        //}
+        try {
+            new GameMatrix();
+            game.randomizedPlayers = GameMatrix.randomizePlayers(GameMatrix.getPlayers());
+            mainFrame = new MainFrame(game, ghostFigure);
+            mainFrame.setVisible(true);
+            game.run();
+            System.exit(0);
+        } catch (Exception ex) {
+            log(ex);
+        }
     }
 
     private boolean checkIfAllKeysAreEmpty(HashMap<Player, Integer> map, Player[] randomizedPlayers) {
-        //for (HashMap<Player, Integer> elem : list) {
-            for (Player p : randomizedPlayers) {
+        for (Player p : randomizedPlayers) {
                 /*if (!map.containsKey(p)) {
                     continue;
                 }*/
-                if (map.get(p) > 0) {
-                    return false;
-                }
+            if (map.get(p) > 0) {
+                return false;
             }
-        //}
+        }
         return true;
     }
 
@@ -167,7 +141,6 @@ public class Game {
                     if (getWhichFigureIsPlayerPlayingWith(map, currentPlayer) != -1) {
                         try {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(map, currentPlayer);
-                            int currentFigureNumber = whichFigure;
                             if (helpBool) {
                                 //ghostFigure = new GhostFigure();
                                 ghostFigure.start();
@@ -184,7 +157,7 @@ public class Game {
                                 Thread.sleep(1000);
                             } else if (card instanceof SimpleCard) {
                                 SimpleCard sCard = (SimpleCard) card;
-                                String cardDescription = String.valueOf("SIMPLE: " + sCard.getNumberOfFieldsToCross());
+                                String cardDescription = "SIMPLE: " + sCard.getNumberOfFieldsToCross();
                                 mainFrame.setCardDescLabel(cardDescription);
                                 mainFrame.setCardPicLabel("simple", sCard.getNumberOfFieldsToCross());
                                 if (processSimpleCard(randomizedPlayers, map, figureMap, i, whichFigure, (SimpleCard) card)) {
@@ -199,7 +172,7 @@ public class Game {
                     }
                 }
             }
-            if(ghostFigure.isAlive()) {
+            if (ghostFigure.isAlive()) {
                 try {
                     ghostFigure.join();
                 } catch (InterruptedException ex) {
@@ -251,7 +224,7 @@ public class Game {
         String labelText = "Na potezu je igrac " + i + "., Figura " + whichFigure + ", prelazi " + (fullPosition - playerPosition) + "" +
                 "polja, pomjera se sa pozicije " + GameMatrix.getOriginalMap().get(playerPosition) + " na " +
                 GameMatrix.getOriginalMap().get(fullPosition) + ".";
-        mainFrame.setCurrCardLabel(labelText);
+        MainFrame.setCurrCardLabel(labelText);
 
 
         for (int pos = playerPosition; pos <= fullPosition; pos++) {
@@ -288,7 +261,7 @@ public class Game {
                 //randomizedPlayers[i].getFigures()[whichFigure].setPosition(GameMatrix.getMapTraversal().size() - 1);
                 map.put(randomizedPlayers[i], map.get(randomizedPlayers[i]) - 1);
                 //list.get(i).replace(randomizedPlayers[i], list.get(i).get(randomizedPlayers[i]) - 1);
-                if(map.get(randomizedPlayers[i]) == 0) {
+                if (map.get(randomizedPlayers[i]) == 0) {
                     isItOverFlag = true;
                 }
                 String newString = figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]) + "" +
@@ -305,7 +278,7 @@ public class Game {
             }
             if (pos < GameMatrix.getMapTraversal().size()) {
                 if (pos != GameMatrix.getMapTraversal().size() - 1 /*&& (pos == fullPosition || pos == 0)*/) {
-                    if(!figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]).contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
+                    if (!figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]).contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
                         String newString = figureMap.get(randomizedPlayers[i].getFigures()[whichFigure]) + "" +
                                 GameMatrix.getOriginalMap().get(pos) + "-";
                         figureMap.replace(randomizedPlayers[i].getFigures()[whichFigure], newString);
@@ -396,7 +369,7 @@ public class Game {
                 fileName + sdf.format(date))));
         for (Player p : randomizedPlayers) {
             for (Figure f : p.getFigures()) {
-                String helpString = null;
+                String helpString;
                 if (f.didFigureFinish()) {
                     helpString = "DA";
                 } else {
