@@ -1,11 +1,10 @@
 package player;
 import figure.Figure;
-import game.GameMatrix;
 
 public class Player {
-    private String name;
+    private final String name;
     private static int id = 0;
-    private Figure[] figures = new Figure[GameMatrix.NUMBER_OF_FIGURES];
+    private final Figure[] figures;
 
     public Player(String name, Figure[] figures) {
         this.name = name + id++;

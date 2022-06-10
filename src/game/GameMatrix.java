@@ -70,8 +70,8 @@ public class GameMatrix {
         return NUMBER_OF_PLAYERS;
     }
 
-    public static void setMapTraversal(int positon, Object element) {
-        mapTraversal.set(positon, element);
+    public static void setMapTraversal(int position, Object element) {
+        mapTraversal.set(position, element);
     }
 
     /*private int loadMatrixDimensions() throws InvalidMatrixDimension {

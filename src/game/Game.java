@@ -10,11 +10,10 @@ import cards.SimpleCard;
 import cards.SpecialCard;
 import figure.Figure;
 import figure.GhostFigure;
-import hole.Hole;
+import gui.RefreshingFormThread;
 import gui.MainFrame;
 import pair.Pair;
 import player.Player;
-
 import java.awt.*;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
@@ -73,7 +72,7 @@ public class Game {
             mainFrame = new MainFrame(game, ghostFigure);
             mainFrame.setVisible(true);
             game.run();
-            System.exit(0);
+            RefreshingFormThread.setIsOver();
         } catch (Exception ex) {
             log(ex);
         }
@@ -131,7 +130,6 @@ public class Game {
                         }
                     }
                     long figureTimeStart = new Date().getTime();
-                    long figureTimeFinish = 0;
                     if (pause) {
                         synchronized (this) {
                             wait();
@@ -142,12 +140,11 @@ public class Game {
                         try {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(map, currentPlayer);
                             if (helpBool) {
-                                //ghostFigure = new GhostFigure();
                                 ghostFigure.start();
                                 helpBool = false;
                             }
                             Card card = deck.pullOutACard();
-                            removeHoles();
+                            //removeHoles();
                             mainFrame.clearHoles();
                             if (card instanceof SpecialCard) {
                                 String cardDescription = "SPECIAL";
@@ -161,9 +158,9 @@ public class Game {
                                 mainFrame.setCardDescLabel(cardDescription);
                                 mainFrame.setCardPicLabel("simple", sCard.getNumberOfFieldsToCross());
                                 if (processSimpleCard(randomizedPlayers, map, figureMap, i, whichFigure, (SimpleCard) card)) {
-                                    updateFigureTimeInThread(figureTimeFinish, figureTimeStart, currentPlayer, whichFigure);
+                                    updateFigureTimeInThread(figureTimeStart, currentPlayer, whichFigure);
                                 } else {
-                                    updateFigureTimeInThread(figureTimeFinish, figureTimeStart, currentPlayer, whichFigure);
+                                    updateFigureTimeInThread(figureTimeStart, currentPlayer, whichFigure);
                                 }
                             }
                         } catch (InterruptedException ex) {
@@ -189,8 +186,8 @@ public class Game {
         }
     }
 
-    private void updateFigureTimeInThread(long figureTimeFinish, long figureTimeStart, Player randomizedPlayers, int whichFigure) {
-        figureTimeFinish = new Date().getTime();
+    private void updateFigureTimeInThread(long figureTimeStart, Player randomizedPlayers, int whichFigure) {
+        long figureTimeFinish = new Date().getTime();
         long finalTime = figureTimeFinish - figureTimeStart;
         randomizedPlayers.getFigures()[whichFigure].setTime(
                 randomizedPlayers.getFigures()[whichFigure].getTime() + finalTime);
@@ -294,13 +291,8 @@ public class Game {
 
     private void processSpecialCard(Random random, int i, HashMap<Player, Integer> map, Player[] randomizedPlayers) {
         int generatedNumberOfHoles = generateNumberOfHoles();
-        Hole[] holes = new Hole[generatedNumberOfHoles];
-        for (int h = 0; h < holes.length; h++) {
-            holes[h] = new Hole();
-        }
         List<Integer> holePositions = new ArrayList<>();
         int temp = generatedNumberOfHoles;
-
 
         synchronized (this) {
             synchronized (mainFrame) {
@@ -315,21 +307,7 @@ public class Game {
                         temp--;
                     }
 
-                    /*for (int holePosition : holePositions) {
-                        Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(holePosition);
-                        Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
-                        if (!(GameMatrix.getMapTraversal().get(holePosition) instanceof Bonus)) {
-                            mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
-                        } else {
-                            //mainFrame.holeBonus(oldMatrixPosition);
-                            mainFrame.eatBonus(oldMatrixPosition);
-                            mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
-                            GameMatrix.setMapTraversal(holePositions.get(holePosition), null);
-                        }
-                    }*/
-
                     for (int k = 0; k < holePositions.size(); k++) {
-
                         Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(holePositions.get(k));
                         Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
                         if (!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof Bonus)) {
@@ -360,7 +338,7 @@ public class Game {
         }
     }
 
-    private void writeToFiles(long startTime, Player[] randomizedPlayers, HashMap<Figure, String> figureMap) throws IOException, InterruptedException {
+    private void writeToFiles(long startTime, Player[] randomizedPlayers, HashMap<Figure, String> figureMap) throws IOException {
         int outerCounter = 0;
         int innerCounter = 0;
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH-mm-ss.SSS");
@@ -391,13 +369,13 @@ public class Game {
         return random.nextInt(GameMatrix.NUMBER_OF_HOLES) + 1;
     }
 
-    private void removeHoles() {
+    /*private void removeHoles() {
         for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
             if (GameMatrix.getMapTraversal().get(i) instanceof Hole) {
                 GameMatrix.setMapTraversal(i, null);
             }
         }
-    }
+    }*/
 
     private static void log(Exception ex) {
         Logger.getLogger(Game.class.getName()).log(Level.WARNING, ex.fillInStackTrace().toString());

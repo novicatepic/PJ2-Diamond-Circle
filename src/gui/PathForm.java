@@ -8,14 +8,13 @@ import java.awt.*;
 import java.util.ArrayList;
 
 public class PathForm extends JFrame {
-    private int position = 0;
-    private ArrayList<Integer> integersToPrint = new ArrayList<>();
-    private JPanel contentPane;
-    private JLabel matrixLabels[][] = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
+
+    private final ArrayList<Integer> integersToPrint = new ArrayList<>();
+    private final JLabel[][] matrixLabels = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
 
     public PathForm(int elem) {
-        position = elem;
-        for(int i = 0; i < position; i++) {
+        final JPanel contentPane;
+        for(int i = 0; i < elem; i++) {
             integersToPrint.add((Integer)GameMatrix.getOriginalMap().get(i));
         }
         setResizable(false);
@@ -40,7 +39,7 @@ public class PathForm extends JFrame {
         for(int i = 0; i < GameMatrix.getMatrixDimensions(); i++) {
             for(int j = 0; j < GameMatrix.getMatrixDimensions(); j++) {
                 if(integersToPrint.contains(Integer.parseInt(matrixLabels[i][j].getText()))) {
-                    matrixLabels[i][j].setForeground(Color.BLUE);
+                    matrixLabels[i][j].setForeground(Color.BLACK);
                 }
                 else {
                     matrixLabels[i][j].setForeground(Color.WHITE);

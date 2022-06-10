@@ -12,6 +12,7 @@ public class RefreshingFormThread extends Thread {
     private long accumulatedSeconds;
     private long accumulatedSecondsHelper;
     private static Handler handler;
+    private static boolean isOver = false;
 
     static {
         try {
@@ -30,10 +31,14 @@ public class RefreshingFormThread extends Thread {
 
     }
 
+    public static void setIsOver() {
+        isOver = true;
+    }
+
     @Override
     public void run() {
         MainFrame.setTimePlayedLabel("0");
-        while (true) {
+        while (!isOver) {
             accumulatedSeconds += accumulatedSecondsHelper;
             accumulatedSecondsHelper = 0;
             long time = System.currentTimeMillis() - start - (accumulatedSeconds * 1000);
@@ -54,6 +59,7 @@ public class RefreshingFormThread extends Thread {
                     }
                 }
             }
+
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException exc) {

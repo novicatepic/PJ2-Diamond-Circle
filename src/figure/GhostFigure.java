@@ -69,7 +69,7 @@ public class GhostFigure extends Thread {
                 findPositionsForGhost();
                 clearDiamonds();
                 for (int i = 0; i < randomPositions.size(); i++) {
-                    synchronized (Game.getGame()/*s()[Game.getI()]*/) {
+                    synchronized (Game.getGame()) {
                         synchronized (Game.getMainFrame()) {
                             Integer randomPosition = randomPositions.get(i);
                             Bonus bonus = new Diamond();

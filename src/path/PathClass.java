@@ -6,10 +6,6 @@ public class PathClass {
     private Object[][] MATRIX;
     private Integer MATRIX_DIMENSIONS;
 
-    public PathClass() {
-
-    }
-
     public PathClass(Object[][] matrix, Integer matrixDimensions) {
         MATRIX = matrix;
         MATRIX_DIMENSIONS = matrixDimensions;
@@ -25,7 +21,7 @@ public class PathClass {
     }
 
     private Object[][] shrinkMatrix() {
-        int newBoundaries = 0;
+        int newBoundaries;
         if (MATRIX_DIMENSIONS - 2 < 0) {
             newBoundaries = 1;
         } else {

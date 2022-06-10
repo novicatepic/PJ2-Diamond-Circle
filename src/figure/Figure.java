@@ -6,15 +6,10 @@ import game.GameMatrix;
 import java.awt.*;
 
 abstract public class Figure {
-    private String colour;
+    private final String colour;
     private int position = 0;
     private long time;
     private int bonusCount = 0;
-
-    public Figure() {
-        position = 0;
-        time = 0;
-    }
 
     public Figure(String colour) throws IncorrectColour {
         if(!"red".equalsIgnoreCase(colour) && !"green".equalsIgnoreCase(colour) &&
@@ -29,16 +24,16 @@ abstract public class Figure {
     }
 
     public Color getRealColour() {
-        if("yellow".equals(colour)) {
+        if("yellow".equalsIgnoreCase(colour)) {
             return Color.YELLOW;
         }
-        else if("blue".equals(colour)) {
+        else if("blue".equalsIgnoreCase(colour)) {
             return Color.BLUE;
         }
-        else if("red".equals(colour)) {
+        else if("red".equalsIgnoreCase(colour)) {
             return Color.RED;
         }
-        else if("green".equals(colour)) {
+        else if("green".equalsIgnoreCase(colour)) {
             return Color.green;
         }
         else {
