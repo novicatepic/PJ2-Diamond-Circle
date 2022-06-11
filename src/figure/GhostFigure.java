@@ -4,31 +4,15 @@ import bonus.Bonus;
 import bonus.Diamond;
 import game.Game;
 import gui.MainFrame;
-import hole.Hole;
 import game.GameMatrix;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 public class GhostFigure extends Thread {
     private List<Integer> randomPositions;
-    private static Handler ghostHandler;
     private boolean isGhostAlive = true;
-
-    static {
-        try {
-            ghostHandler = new FileHandler("ghostlog.log");
-            Logger.getLogger(GhostFigure.class.getName()).addHandler(ghostHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public GhostFigure() {
         super();
@@ -69,19 +53,22 @@ public class GhostFigure extends Thread {
                 findPositionsForGhost();
                 clearDiamonds();
                 for (int i = 0; i < randomPositions.size(); i++) {
-                    synchronized (Game.getGame()) {
-                        synchronized (Game.getMainFrame()) {
-                            Integer randomPosition = randomPositions.get(i);
-                            Bonus bonus = new Diamond();
+                    if (Game.pause) {
+                        synchronized (this) {
+                            wait();
+                        }
+                    }
 
-                            if(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
-                                Figure f = (Figure)GameMatrix.getMapTraversal().get(randomPosition);
+                    Integer randomPosition = randomPositions.get(i);
+                    Bonus bonus = new Diamond();
+
+                    synchronized (Game.getMainFrame()) {
+                        synchronized (GameMatrix.getMapTraversal()) {
+                            if (GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
+                                Figure f = (Figure) GameMatrix.getMapTraversal().get(randomPosition);
                                 f.setBonusCount(f.getBonusCount() + 1);
                             }
-
-                            if (!(GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) &&
-                                    !(GameMatrix.getMapTraversal().get(randomPosition) instanceof Hole)) {
-                                //Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(randomPosition);
+                            else {
                                 if (!MainFrame.checkIfFieldIsBlack(randomPosition)) {
                                     MainFrame.setBonusLabel(randomPosition);
                                     GameMatrix.setMapTraversal(randomPosition, bonus);
@@ -90,35 +77,32 @@ public class GhostFigure extends Thread {
                         }
                     }
                 }
+
+                sleep(5000);
+
                 if (Game.pause) {
                     synchronized (this) {
                         wait();
                     }
                 }
 
-                sleep(5000);
-
-                synchronized (Game.getGame()/*s()[Game.getI()]*/) {
-                    synchronized (Game.getMainFrame()) {
-                        synchronized (GameMatrix.getMapTraversal()) {
-                            MainFrame.clearBonuses();
-                        }
+                synchronized (Game.getMainFrame()) {
+                    synchronized (GameMatrix.getMapTraversal()) {
+                        MainFrame.clearBonuses();
                     }
                 }
             }
         } catch (InterruptedException ex) {
-            Logger.getLogger(GhostFigure.class.getName()).log(Level.WARNING, ex.toString());
+            Game.log(ex);
         }
     }
 
     private void clearDiamonds() {
-        synchronized (Game.getGame()) {
+        for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
             synchronized (Game.getMainFrame()) {
                 synchronized (GameMatrix.getMapTraversal()) {
-                    for (int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
-                        if (GameMatrix.getMapTraversal().get(i) instanceof Bonus && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)) {
-                            GameMatrix.setMapTraversal(i, null);
-                        }
+                    if (GameMatrix.getMapTraversal().get(i) instanceof Bonus && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)) {
+                        GameMatrix.setMapTraversal(i, null);
                     }
                 }
             }

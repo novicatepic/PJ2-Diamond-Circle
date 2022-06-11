@@ -1,4 +1,6 @@
 package gui;
+import game.Game;
+
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
@@ -8,25 +10,11 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class FileForm extends JFrame {
     private final ArrayList<String> listOfFiles = new ArrayList<>();
     private static final String CURRENT_PATH = "./";
-    private static Handler fileFormHandler;
     private final JButton[] buttons;
-
-    static {
-        try {
-            fileFormHandler = new FileHandler("fileform.log");
-            Logger.getLogger(FileForm.class.getName()).addHandler(fileFormHandler);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public FileForm() {
         final JPanel contentPane;
@@ -84,7 +72,7 @@ public class FileForm extends JFrame {
                         Desktop.getDesktop().open(openFile);
 
                     } catch (IOException ex) {
-                        log(ex.fillInStackTrace());
+                        Game.log(ex);
                     }
                 }
             });
@@ -118,19 +106,17 @@ public class FileForm extends JFrame {
         File currentPath = new File(CURRENT_PATH);
         File[] files = currentPath.listFiles();
         try {
-            for(File f : files) {
-                if(f != null && !f.isDirectory() && f.getName().contains("IGRA")) {
-                    listOfFiles.add(f.getName());
-                    returnCounter++;
+            if(files != null) {
+                for(File f : files) {
+                    if(f != null && !f.isDirectory() && f.getName().contains("IGRA")) {
+                        listOfFiles.add(f.getName());
+                        returnCounter++;
+                    }
                 }
             }
         } catch (NullPointerException nex) {
-            log(nex.fillInStackTrace());
+            Game.log(nex);
         }
         return returnCounter;
-    }
-
-    private void log(Throwable ex) {
-        Logger.getLogger(FileForm.class.getName()).log(Level.WARNING, ex.toString());
     }
 }

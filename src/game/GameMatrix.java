@@ -1,38 +1,43 @@
 package game;
 
 import bonus.Bonus;
-import exceptions.IncorrectColour;
-import exceptions.InvalidMatrixDimension;
-import exceptions.InvalidNumberOfPlayers;
+import exceptions.*;
 import figure.*;
 import hole.Hole;
 import pair.Pair;
 import path.PathClass;
 import player.Player;
+import java.io.FileInputStream;
+import java.io.IOException;
 import java.util.*;
 
 public class GameMatrix {
 
     public static final Integer NUMBER_OF_FIGURES = 4;
-    private static final int MATRIX_DIMENSIONS = 7;
+    public static final int NUMBER_OF_HOLES = 20;
+    private final String propertyPath = "./config.properties";
+    private static int MATRIX_DIMENSIONS;
     private static Object[][] MATRIX;
-    private static final int NUMBER_OF_PLAYERS = 2;
+    private static int NUMBER_OF_PLAYERS;
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
-    public static final int NUMBER_OF_HOLES = 20;
     String[] colours = new String[]{"yellow", "blue", "red", "green"};
     ArrayList<String> coloursList = new ArrayList<>(Arrays.asList(colours));
 
-    GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers, IncorrectColour {
+    GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers,
+            IncorrectColour, IOException, InvalidNumberOfNamesException, DuplicateNamesException {
+        FileInputStream fis = new FileInputStream(propertyPath);
+        Properties properties = new Properties();
+        properties.load(fis);
+        MATRIX_DIMENSIONS = Integer.parseInt(properties.getProperty("MATRIX-DIMENSIONS"));
+        NUMBER_OF_PLAYERS = Integer.parseInt(properties.getProperty("NUMBER_OF_PLAYERS"));
         if(MATRIX_DIMENSIONS < 7 || MATRIX_DIMENSIONS > 10) {
             throw new InvalidMatrixDimension();
         }
         if(NUMBER_OF_PLAYERS < 2 || NUMBER_OF_PLAYERS > 4) {
             throw new InvalidNumberOfPlayers();
         }
-        //MATRIX_DIMENSIONS = loadMatrixDimensions();
-        //NUMBER_OF_PLAYERS = loadNumberOfPlayers();
         MATRIX = new Object[MATRIX_DIMENSIONS][MATRIX_DIMENSIONS];
         putIntegersToMatrix();
         PathClass pathClass = new PathClass(MATRIX, MATRIX_DIMENSIONS);
@@ -40,9 +45,27 @@ public class GameMatrix {
         mapTraversal = pathClass.getPath();
         originalMap.addAll(mapTraversal);
         players = new Player[NUMBER_OF_PLAYERS];
+
+        String[] playerNames = properties.get("playerNames").toString().split(":");
+        if(playerNames.length != NUMBER_OF_PLAYERS) {
+            throw new InvalidNumberOfNamesException();
+        }
+
+        checkIfSameNamesExist(playerNames);
+
         for (int i = 0; i < NUMBER_OF_PLAYERS; i++) {
             Figure[] figures = generateFigures();
-            players[i] = new Player("name", figures);
+            players[i] = new Player(playerNames[i], figures);
+        }
+    }
+
+    private void checkIfSameNamesExist(String[] playerNames) throws DuplicateNamesException {
+        for(int i = 0; i < playerNames.length - 1; i++) {
+            for(int j = i + 1; j < playerNames.length; j++) {
+                if(playerNames[i].equalsIgnoreCase(playerNames[j])) {
+                    throw new DuplicateNamesException();
+                }
+            }
         }
     }
 
@@ -73,26 +96,6 @@ public class GameMatrix {
     public static void setMapTraversal(int position, Object element) {
         mapTraversal.set(position, element);
     }
-
-    /*private int loadMatrixDimensions() throws InvalidMatrixDimension {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter matrix dimension (7, 8, 9 or 10): ");
-        String userInput = scanner.nextLine();
-        if (!userInput.equals("7") && !userInput.equals("8") && !userInput.equals("9") && !userInput.equals("10")) {
-            throw new InvalidMatrixDimension();
-        }
-        return Integer.parseInt(userInput);
-    }
-
-    private int loadNumberOfPlayers() throws InvalidNumberOfPlayers {
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Enter number of players (2, 3 or 4): ");
-        String userInput = scanner.nextLine();
-        if (!userInput.equals("2") && !userInput.equals("3") && !userInput.equals("4")) {
-            throw new InvalidNumberOfPlayers();
-        }
-        return Integer.parseInt(userInput);
-    }*/
 
     private Figure[] generateFigures() throws IncorrectColour {
         Random random = new Random();
@@ -165,5 +168,11 @@ public class GameMatrix {
         }
         return freePositionCounter;
     }
+
+    /*public static void printMatrix() {
+        for(int i = 0; i < originalMap.size(); i++) {
+            System.out.print(originalMap.get(i) + " ");
+        }
+    }*/
 
 }

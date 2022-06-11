@@ -3,11 +3,10 @@ import figure.Figure;
 
 public class Player {
     private final String name;
-    private static int id = 0;
     private final Figure[] figures;
 
     public Player(String name, Figure[] figures) {
-        this.name = name + id++;
+        this.name = name;
         this.figures = figures;
     }
 

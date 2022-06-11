@@ -34,7 +34,7 @@ abstract public class Figure {
             return Color.RED;
         }
         else if("green".equalsIgnoreCase(colour)) {
-            return Color.green;
+            return Color.GREEN;
         }
         else {
             return null;

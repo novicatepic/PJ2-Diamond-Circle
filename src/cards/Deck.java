@@ -15,6 +15,7 @@ public class Deck {
         int i = 0;
         int numberOfOnes = 0, numberOfTwos = 0, numberOfThrees = 0, numberOfFours = 0;
         while(i != NUMBER_OF_CARDS) {
+            System.out.println("SIMPLE GENERATED");
             boolean nextBoolean = random.nextBoolean();
             if(nextBoolean && simple != NUMBER_OF_SIMPLE_CARDS) {
                 int cardNumber = random.nextInt(4) + 1;
@@ -24,22 +25,31 @@ public class Deck {
                             cards[i++] = new SimpleCard(cardNumber);
                             numberOfOnes++;
                             simple++;
+                            break;
                         }
-                        break;
+                        else {
+                            cardNumber++;
+                        }
                     case 2:
                         if(numberOfTwos != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
                             cards[i++] = new SimpleCard(cardNumber);
                             numberOfTwos++;
                             simple++;
+                            break;
                         }
-                        break;
+                        else {
+                            cardNumber++;
+                        }
                     case 3:
                         if(numberOfThrees != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
                             cards[i++] = new SimpleCard(cardNumber);
                             numberOfThrees++;
                             simple++;
+                            break;
                         }
-                        break;
+                        else {
+                            cardNumber++;
+                        }
                     case 4:
                         if(numberOfFours != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
                             cards[i++] = new SimpleCard(cardNumber);
@@ -47,19 +57,27 @@ public class Deck {
                             simple++;
                         }
                         break;
-                    /*default:
-                        System.out.println("Entered default!");*/
                 }
             }
             else if(!nextBoolean && special != NUMBER_OF_SPECIAL_CARDS){
-                cards[i++] = new SpecialCard();
-                special++;
+                System.out.println("SPECIAL GENERATED");
+                if(i > 0 && !(cards[i-1] instanceof SpecialCard) && i != NUMBER_OF_CARDS - 1) {
+                    cards[i++] = new SpecialCard();
+                    special++;
+                }
             }
         }
+        System.out.println("===============================");
     }
 
     public Card pullOutACard() {
-        Random random = new Random();
-        return cards[random.nextInt(52)];
+        Card pullOut = cards[0];
+
+        for(int i = 1; i < NUMBER_OF_CARDS; i++) {
+            cards[i - 1] = cards[i];
+        }
+        cards[NUMBER_OF_CARDS - 1] = pullOut;
+
+        return pullOut;
     }
 }

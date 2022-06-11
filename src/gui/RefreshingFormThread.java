@@ -1,27 +1,12 @@
 package gui;
 import game.Game;
-import java.io.IOException;
-import java.util.logging.FileHandler;
-import java.util.logging.Handler;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 public class RefreshingFormThread extends Thread {
 
     private final long start;
     private long accumulatedSeconds;
     private long accumulatedSecondsHelper;
-    private static Handler handler;
     private static boolean isOver = false;
-
-    static {
-        try {
-            handler = new FileHandler("refreshing.log");
-            Logger.getLogger(RefreshingFormThread.class.getName()).addHandler(handler);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
 
     public RefreshingFormThread() {
         super();
@@ -55,7 +40,7 @@ public class RefreshingFormThread extends Thread {
                     try {
                         Thread.sleep(1000);
                     } catch (InterruptedException exc) {
-                        processException(exc);
+                        Game.log(exc);
                     }
                 }
             }
@@ -63,13 +48,9 @@ public class RefreshingFormThread extends Thread {
             try {
                 Thread.sleep(1000);
             } catch (InterruptedException exc) {
-                processException(exc);
+                Game.log(exc);
             }
         }
-    }
-
-    private void processException(InterruptedException exc) {
-        Logger.getLogger(RefreshingFormThread.class.getName()).log(Level.WARNING, exc.fillInStackTrace().toString());
     }
 
 }
