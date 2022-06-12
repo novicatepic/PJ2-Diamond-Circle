@@ -5,6 +5,7 @@ import bonus.Diamond;
 import game.Game;
 import gui.MainFrame;
 import game.GameMatrix;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -53,11 +54,7 @@ public class GhostFigure extends Thread {
                 findPositionsForGhost();
                 clearDiamonds();
                 for (int i = 0; i < randomPositions.size(); i++) {
-                    if (Game.pause) {
-                        synchronized (this) {
-                            wait();
-                        }
-                    }
+                    checkPause();
 
                     Integer randomPosition = randomPositions.get(i);
                     Bonus bonus = new Diamond();
@@ -67,8 +64,7 @@ public class GhostFigure extends Thread {
                             if (GameMatrix.getMapTraversal().get(randomPosition) instanceof Figure) {
                                 Figure f = (Figure) GameMatrix.getMapTraversal().get(randomPosition);
                                 f.setBonusCount(f.getBonusCount() + 1);
-                            }
-                            else {
+                            } else {
                                 if (!MainFrame.checkIfFieldIsBlack(randomPosition)) {
                                     MainFrame.setBonusLabel(randomPosition);
                                     GameMatrix.setMapTraversal(randomPosition, bonus);
@@ -80,11 +76,7 @@ public class GhostFigure extends Thread {
 
                 sleep(5000);
 
-                if (Game.pause) {
-                    synchronized (this) {
-                        wait();
-                    }
-                }
+                checkPause();
 
                 synchronized (Game.getMainFrame()) {
                     synchronized (GameMatrix.getMapTraversal()) {
@@ -94,6 +86,14 @@ public class GhostFigure extends Thread {
             }
         } catch (InterruptedException ex) {
             Game.log(ex);
+        }
+    }
+
+    private void checkPause() throws InterruptedException {
+        if (Game.pause) {
+            synchronized (this) {
+                wait();
+            }
         }
     }
 

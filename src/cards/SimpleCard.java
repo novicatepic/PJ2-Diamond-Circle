@@ -1,7 +1,7 @@
 package cards;
 
 public class SimpleCard extends Card {
-    private int numberOfFieldsToCross;
+    private final int numberOfFieldsToCross;
 
     SimpleCard(int fieldNumber) {
         this.numberOfFieldsToCross = fieldNumber;

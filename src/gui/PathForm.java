@@ -14,6 +14,9 @@ public class PathForm extends JFrame {
 
     public PathForm(int elem) {
         final JPanel contentPane;
+        if(elem != GameMatrix.getOriginalMap().size() && elem != 0) {
+            elem++;
+        }
         for(int i = 0; i < elem; i++) {
             integersToPrint.add((Integer)GameMatrix.getOriginalMap().get(i));
         }

@@ -40,10 +40,11 @@ public class PathClass {
     }
 
     private boolean doesElementExist(int row, int column) {
-        if (row >= MATRIX_DIMENSIONS || column >= MATRIX_DIMENSIONS || column < 0 || row < 0) {
+        return(!(row >= MATRIX_DIMENSIONS || column >= MATRIX_DIMENSIONS || column < 0 || row < 0));
+        /*if (row >= MATRIX_DIMENSIONS || column >= MATRIX_DIMENSIONS || column < 0 || row < 0) {
             return false;
         }
-        return true;
+        return true;*/
     }
 
     private ArrayList<Integer> getUnevenMatrixValidPositions(int[] boundaries) {

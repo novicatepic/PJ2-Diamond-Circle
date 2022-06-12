@@ -19,15 +19,63 @@ public class MainFrame extends JFrame {
     private static final JLabel[][] matrixLabels = new JLabel[GameMatrix.getMatrixDimensions()][GameMatrix.getMatrixDimensions()];
     private final JButton[] playerButtons = new JButton[16];
     private static JLabel currCardLabel;
-    private final JLabel cardDescLabel;
-    private final JLabel cardPicLabel;
+    private JLabel cardDescLabel;
+    private JLabel cardPicLabel;
     private int gamesPlayed = 0;
     private final static JLabel labelGamesPlayed = new JLabel();
     private final JPanel[] squarePanels = new JPanel[4];
     private final Game game;
     private static JLabel timePlayedLabel;
-    private final RefreshingFormThread refreshingFormThread = new RefreshingFormThread();
+    private final RefreshingForm refreshingForm = new RefreshingForm();
     private final String workingDirectory = "./";
+
+    public MainFrame(Game game) {
+        this.game = game;
+        setGamesPlayed();
+
+        setTitle("DIAMOND CIRCLE GAME");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setResizable(false);
+        setBounds(100, 100, 870, 686);
+        mainPane = setUpMainPane();
+
+        setUpLbWelcomeAndGamesPlayed();
+
+        makeTitle();
+
+        startStopSetupAndGo();
+
+        JPanel playerPanel = setUpPlayerPanel();
+
+        setupPlayerLabels(playerPanel);
+
+        JPanel figurePanel = setUpFigurePanel();
+
+        setUpPathButtons(figurePanel);
+        disablePlayerButtons(playerButtons[8], playerButtons[9], playerButtons[10], playerButtons[11], playerButtons[12], playerButtons[13], playerButtons[14], playerButtons[15]);
+
+        setUpCurrCardLabel();
+
+        JPanel showFilesPanel = setUpShowFilesPanel();
+
+        showFilesSetupAndGo(showFilesPanel);
+
+        JPanel cardPanel = setUpCardPanelAndLabels();
+
+        initializeConcreteLabel(cardPanel);
+
+        initializeMatrix();
+
+        buttonActionListeners();
+
+        setUpTimePlayedLabel();
+
+        refreshingForm.start();
+
+        setUpFourCardFields(cardPanel);
+
+        setMatrixColors();
+    }
 
     public static JLabel getCurrCardLabel() {
         return currCardLabel;
@@ -45,7 +93,7 @@ public class MainFrame extends JFrame {
         File currentPath = new File(workingDirectory);
         try {
             File[] files = currentPath.listFiles();
-            if(files != null) {
+            if (files != null) {
                 for (File f : files) {
                     if (!f.isDirectory() && f.getName().contains("IGRA")) {
                         gamesPlayed++;
@@ -65,8 +113,8 @@ public class MainFrame extends JFrame {
 
     public static boolean checkIfFieldIsBlack(int position) {
         Pair pair = GameMatrix.getMatrixPositionOfElement(position);
-        int xCoordinate = - 1, yCoordinate = -1;
-        if(pair != null) {
+        int xCoordinate = -1, yCoordinate = -1;
+        if (pair != null) {
             xCoordinate = pair.getX();
             yCoordinate = pair.getY();
         }
@@ -106,12 +154,10 @@ public class MainFrame extends JFrame {
     public static void setBonusLabel(int position) {
         Pair pair = GameMatrix.getMatrixPositionOfElement(position);
         int xCoordinate = -1, yCoordinate = -1;
-        if(pair != null) {
+        if (pair != null) {
             xCoordinate = pair.getX();
             yCoordinate = pair.getY();
         }
-
-
         try {
             BufferedImage img = ImageIO.read(new File("diamond.png"));
             Image dimg = img.getScaledInstance(matrixLabels[xCoordinate][yCoordinate].getWidth(),
@@ -147,7 +193,6 @@ public class MainFrame extends JFrame {
     public void setMatrixLabel(Color color, Pair pair, String newLabelString) {
         int xCoordinate = pair.getX();
         int yCoordinate = pair.getY();
-        //matrixLabels[xCoordinate][yCoordinate].setBackground(color);
         if ("H".equals(newLabelString)) {
             matrixLabels[xCoordinate][yCoordinate].setBackground(color);
             if (!"FF".equals(matrixLabels[xCoordinate][yCoordinate].getText())) {
@@ -170,127 +215,81 @@ public class MainFrame extends JFrame {
         }
     }
 
-    public void eatBonus(Pair pair) {
-        matrixLabels[pair.getX()][pair.getY()].setIcon(null);
-        matrixLabels[pair.getX()][pair.getY()].setText(String.valueOf(GameMatrix.getMATRIX()[pair.getX()][pair.getY()]));
-        matrixLabels[pair.getX()][pair.getY()].setBackground(Color.BLACK);
-    }
 
-    public MainFrame(Game game) {
-        this.game = game;
-        setGamesPlayed();
-
+    private void setUpLbWelcomeAndGamesPlayed() {
         final JLabel lbWelcome;
-
-        setTitle("DIAMOND CIRCLE GAME");
-        //was exit on close
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        setResizable(false);
-        setBounds(100, 100, 870, 686);
-        mainPane = new JPanel();
-        mainPane.setBorder(new EmptyBorder(5, 5, 5, 5));
-        setContentPane(mainPane);
-        mainPane.setLayout(null);
-
         lbWelcome = new JLabel("");
         lbWelcome.setBounds(10, 93, 576, 33);
         mainPane.add(lbWelcome);
 
-        //labelGamesPlayed = new JLabel();
         labelGamesPlayed.setBounds(34, 23, 150, 25);
         mainPane.add(labelGamesPlayed);
+    }
 
-        JLabel labelDiamondCircle = new JLabel("DiamondCircle");
-        labelDiamondCircle.setBackground(Color.ORANGE);
-        labelDiamondCircle.setForeground(Color.RED);
-        labelDiamondCircle.setFont(new Font("Times New Roman", Font.PLAIN, 24));
-        labelDiamondCircle.setHorizontalAlignment(SwingConstants.CENTER);
-        labelDiamondCircle.setBounds(275, 10, 271, 38);
-        mainPane.add(labelDiamondCircle);
+    private JPanel setUpMainPane() {
+        final JPanel mainPane;
+        mainPane = new JPanel();
+        mainPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(mainPane);
+        mainPane.setLayout(null);
+        return mainPane;
+    }
 
-        JButton startStopButton = new JButton("Pokreni / zaustavi");
-        startStopButton.setBounds(710, 22, 136, 27);
-        mainPane.add(startStopButton);
-
-        startStopButton.addActionListener(new ActionListener() {
-            public void actionPerformed(ActionEvent e) {
-                if (Game.pause) {
-                    Game.pause = false;
-                    try {
-                        synchronized (game) {
-                            synchronized (Game.getGhostFigure()) {
-                                Game.getGhostFigure().notify();
-                                game.notify();
-                            }
-                        }
-                    } catch (Exception ex) {
-                        Game.log(ex);
-                    }
-                } else {
-                    Game.pause = true;
-                }
-            }
-        });
-
-        JPanel playerPanel = new JPanel();
-        playerPanel.setBounds(25, 58, 821, 53);
-        mainPane.add(playerPanel);
-        playerPanel.setLayout(null);
-
-        JLabel playerOneLabel = new JLabel(game.getRandomizedPlayers()[0].getName());
-        playerOneLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        playerOneLabel.setBounds(131, 10, 75, 33);
-        setFigureLabelColours(0, playerOneLabel);
-        playerPanel.add(playerOneLabel);
-
-
-        JLabel playerTwoLabel = new JLabel(game.getRandomizedPlayers()[1].getName());
-        playerTwoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        playerTwoLabel.setBounds(280, 10, 75, 33);
-        playerPanel.add(playerTwoLabel);
-        setFigureLabelColours(1, playerTwoLabel);
-
-        if(GameMatrix.getNumberOfPlayers() > 2) {
-            JLabel playerThreeLabel = new JLabel(game.getRandomizedPlayers()[2].getName());
-            playerThreeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            playerThreeLabel.setBounds(470, 10, 75, 33);
-            playerPanel.add(playerThreeLabel);
-            setFigureLabelColours(2, playerThreeLabel);
-        }
-
-        if(GameMatrix.getNumberOfPlayers() == 4) {
-            JLabel playerFourLabel = new JLabel(game.getRandomizedPlayers()[3].getName());
-            playerFourLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            playerFourLabel.setBounds(619, 10, 75, 33);
-            playerPanel.add(playerFourLabel);
-            setFigureLabelColours(3, playerFourLabel);
-        }
-
-        JPanel figurePanel = new JPanel();
-        figurePanel.setBounds(10, 136, 105, 503);
-        mainPane.add(figurePanel);
-        figurePanel.setLayout(null);
-
+    private void setUpPathButtons(JPanel figurePanel) {
         int initYValue = 10;
+        int whichPlayer;
+        int outerCounter = 0;
         for (int i = 0; i < playerButtons.length; i++) {
-            int temp = i + 1;
-            playerButtons[i] = new JButton("Figura" + temp);
+            if(i < 4) {
+                whichPlayer = 1;
+            }
+            else if(i < 8) {
+                whichPlayer = 2;
+            }
+            else if(i < 12) {
+                whichPlayer = 3;
+            }
+            else {
+                whichPlayer = 4;
+            }
+            if(i % 4 == 0) {
+                outerCounter = 1;
+            }
+            else {
+                outerCounter++;
+            }
+            playerButtons[i] = new JButton("P" + whichPlayer + " F" + outerCounter);
             playerButtons[i].setBounds(10, initYValue, 85, 21);
             initYValue += 31;
             figurePanel.add(playerButtons[i]);
         }
-        disablePlayerButtons(playerButtons[8], playerButtons[9], playerButtons[10], playerButtons[11], playerButtons[12], playerButtons[13], playerButtons[14], playerButtons[15]);
+    }
 
-        currCardLabel = new JLabel("New label");
-        currCardLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        currCardLabel.setBounds(125, 536, 584, 103);
-        mainPane.add(currCardLabel);
+    private JPanel setUpFigurePanel() {
+        JPanel figurePanel = new JPanel();
+        figurePanel.setBounds(10, 136, 105, 503);
+        mainPane.add(figurePanel);
+        figurePanel.setLayout(null);
+        return figurePanel;
+    }
 
+    private JPanel setUpPlayerPanel() {
+        JPanel playerPanel = new JPanel();
+        playerPanel.setBounds(25, 58, 821, 53);
+        mainPane.add(playerPanel);
+        playerPanel.setLayout(null);
+        return playerPanel;
+    }
+
+    private JPanel setUpShowFilesPanel() {
         JPanel showFilesPanel = new JPanel();
         showFilesPanel.setBounds(719, 533, 127, 106);
         mainPane.add(showFilesPanel);
         showFilesPanel.setLayout(null);
+        return showFilesPanel;
+    }
 
+    private void showFilesSetupAndGo(JPanel showFilesPanel) {
         JButton showFilesButton = new JButton("FAJLOVI");
         showFilesButton.setBounds(21, 10, 85, 86);
         showFilesPanel.add(showFilesButton);
@@ -302,7 +301,9 @@ public class MainFrame extends JFrame {
                 fileForm.setVisible(true);
             }
         });
+    }
 
+    private JPanel setUpCardPanelAndLabels() {
         JPanel cardPanel = new JPanel();
         cardPanel.setBounds(719, 133, 127, 390);
         mainPane.add(cardPanel);
@@ -317,40 +318,26 @@ public class MainFrame extends JFrame {
         cardPicLabel.setHorizontalAlignment(SwingConstants.CENTER);
         cardPicLabel.setBounds(10, 52, 107, 139);
         cardPanel.add(cardPicLabel);
+        return cardPanel;
+    }
 
-        initializeConcreteLabel(cardPanel);
-        initializeMatrix();
-
-        buttonActionListener(0, 0, 0, game);
-        buttonActionListener(1, 0, 1, game);
-        buttonActionListener(2, 0, 2, game);
-        buttonActionListener(3, 0, 3, game);
-        buttonActionListener(4, 1, 0, game);
-        buttonActionListener(5, 1, 1, game);
-        buttonActionListener(6, 1, 2, game);
-        buttonActionListener(7, 1, 3, game);
-
-        if (playerButtons[8].isEnabled()) {
-            buttonActionListener(8, 2, 0, game);
-            buttonActionListener(9, 2, 0, game);
-            buttonActionListener(10, 2, 0, game);
-            buttonActionListener(11, 2, 0, game);
-        }
-
-        if (playerButtons[12].isEnabled()) {
-            buttonActionListener(12, 2, 0, game);
-            buttonActionListener(13, 2, 0, game);
-            buttonActionListener(14, 2, 0, game);
-            buttonActionListener(15, 2, 0, game);
-        }
-
+    private void setUpTimePlayedLabel() {
         timePlayedLabel = new JLabel();
         timePlayedLabel.setText("0");
         timePlayedLabel.setBounds(516, 10, 184, 32);
         mainPane.add(timePlayedLabel);
+    }
 
-        refreshingFormThread.start();
+    private void setMatrixColors() {
+        for (int i = 0; i < matrixLabels.length; i++) {
+            for (int j = 0; j < matrixLabels.length; j++) {
+                matrixLabels[i][j].setOpaque(true);
+                matrixLabels[i][j].setBackground(Color.WHITE);
+            }
+        }
+    }
 
+    private void setUpFourCardFields(JPanel cardPanel) {
         JPanel panel = new JPanel();
         panel.setBounds(10, 201, 38, 46);
         cardPanel.add(panel);
@@ -367,16 +354,111 @@ public class MainFrame extends JFrame {
         panel_3.setBounds(68, 257, 38, 46);
         cardPanel.add(panel_3);
         squarePanels[3] = panel_3;
+    }
 
-        for (int i = 0; i < matrixLabels.length; i++) {
-            for (int j = 0; j < matrixLabels.length; j++) {
-                matrixLabels[i][j].setOpaque(true);
-                matrixLabels[i][j].setBackground(Color.WHITE);
-            }
+    private void buttonActionListeners() {
+        buttonActionListener(0, 0, 0);
+        buttonActionListener(1, 0, 1);
+        buttonActionListener(2, 0, 2);
+        buttonActionListener(3, 0, 3);
+        buttonActionListener(4, 1, 0);
+        buttonActionListener(5, 1, 1);
+        buttonActionListener(6, 1, 2);
+        buttonActionListener(7, 1, 3);
+
+        if (playerButtons[8].isEnabled()) {
+            buttonActionListener(8, 2, 0);
+            buttonActionListener(9, 2, 1);
+            buttonActionListener(10, 2, 2);
+            buttonActionListener(11, 2, 3);
+        }
+
+        if (playerButtons[12].isEnabled()) {
+            buttonActionListener(12, 3, 0);
+            buttonActionListener(13, 3, 1);
+            buttonActionListener(14, 3, 2);
+            buttonActionListener(15, 3, 3);
         }
     }
 
-    private void buttonActionListener(int x, int x1, int x2, Game game) {
+    private void setUpCurrCardLabel() {
+        currCardLabel = new JLabel("New label");
+        currCardLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        currCardLabel.setBounds(125, 536, 584, 103);
+        mainPane.add(currCardLabel);
+    }
+
+    private void setupPlayerLabels(JPanel playerPanel) {
+        JLabel playerOneLabel = new JLabel(game.getRandomizedPlayers()[0].getName());
+        playerOneLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        playerOneLabel.setBounds(131, 10, 75, 33);
+        setFigureLabelColours(0, playerOneLabel);
+        playerPanel.add(playerOneLabel);
+
+
+        JLabel playerTwoLabel = new JLabel(game.getRandomizedPlayers()[1].getName());
+        playerTwoLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        playerTwoLabel.setBounds(280, 10, 75, 33);
+        playerPanel.add(playerTwoLabel);
+        setFigureLabelColours(1, playerTwoLabel);
+
+        if (GameMatrix.getNumberOfPlayers() > 2) {
+            JLabel playerThreeLabel = new JLabel(game.getRandomizedPlayers()[2].getName());
+            playerThreeLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            playerThreeLabel.setBounds(470, 10, 75, 33);
+            playerPanel.add(playerThreeLabel);
+            setFigureLabelColours(2, playerThreeLabel);
+        }
+
+        if (GameMatrix.getNumberOfPlayers() == 4) {
+            JLabel playerFourLabel = new JLabel(game.getRandomizedPlayers()[3].getName());
+            playerFourLabel.setHorizontalAlignment(SwingConstants.CENTER);
+            playerFourLabel.setBounds(619, 10, 75, 33);
+            playerPanel.add(playerFourLabel);
+            setFigureLabelColours(3, playerFourLabel);
+        }
+    }
+
+    private void startStopSetupAndGo() {
+        JButton startStopButton = new JButton("Pokreni / zaustavi");
+        startStopButton.setBounds(710, 22, 136, 27);
+        mainPane.add(startStopButton);
+
+        startStopButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (Game.pause) {
+                    Game.pause = false;
+                    try {
+                        synchronized (game) {
+                            synchronized (Game.getGhostFigure()) {
+                                Game.getGhostFigure().notify();
+                                game.notify();
+                            }
+                        }
+                        synchronized (refreshingForm) {
+                            refreshingForm.notify();
+                        }
+                    } catch (Exception ex) {
+                        Game.log(ex);
+                    }
+                } else {
+                    Game.pause = true;
+                }
+            }
+        });
+    }
+
+    private void makeTitle() {
+        JLabel labelDiamondCircle = new JLabel("DiamondCircle");
+        labelDiamondCircle.setBackground(Color.ORANGE);
+        labelDiamondCircle.setForeground(Color.RED);
+        labelDiamondCircle.setFont(new Font("Times New Roman", Font.PLAIN, 24));
+        labelDiamondCircle.setHorizontalAlignment(SwingConstants.CENTER);
+        labelDiamondCircle.setBounds(275, 10, 271, 38);
+        mainPane.add(labelDiamondCircle);
+    }
+
+    private void buttonActionListener(int x, int x1, int x2) {
         playerButtons[x].addActionListener(new ActionListener() {
             public void actionPerformed(ActionEvent e) {
                 PathForm pathForm = new PathForm(game.getRandomizedPlayers()[x1].getFigures()[x2].getPosition());

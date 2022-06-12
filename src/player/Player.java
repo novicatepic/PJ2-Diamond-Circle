@@ -17,4 +17,5 @@ public class Player {
     public Figure[] getFigures() {
         return figures;
     }
+
 }

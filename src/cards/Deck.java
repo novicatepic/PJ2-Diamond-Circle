@@ -15,7 +15,6 @@ public class Deck {
         int i = 0;
         int numberOfOnes = 0, numberOfTwos = 0, numberOfThrees = 0, numberOfFours = 0;
         while(i != NUMBER_OF_CARDS) {
-            System.out.println("SIMPLE GENERATED");
             boolean nextBoolean = random.nextBoolean();
             if(nextBoolean && simple != NUMBER_OF_SIMPLE_CARDS) {
                 int cardNumber = random.nextInt(4) + 1;
@@ -60,14 +59,12 @@ public class Deck {
                 }
             }
             else if(!nextBoolean && special != NUMBER_OF_SPECIAL_CARDS){
-                System.out.println("SPECIAL GENERATED");
                 if(i > 0 && !(cards[i-1] instanceof SpecialCard) && i != NUMBER_OF_CARDS - 1) {
                     cards[i++] = new SpecialCard();
                     special++;
                 }
             }
         }
-        System.out.println("===============================");
     }
 
     public Card pullOutACard() {

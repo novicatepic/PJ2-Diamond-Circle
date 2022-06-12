@@ -12,7 +12,6 @@ import java.io.IOException;
 import java.util.*;
 
 public class GameMatrix {
-
     public static final Integer NUMBER_OF_FIGURES = 4;
     public static final int NUMBER_OF_HOLES = 20;
     private final String propertyPath = "./config.properties";
@@ -169,10 +168,10 @@ public class GameMatrix {
         return freePositionCounter;
     }
 
-    /*public static void printMatrix() {
+    public static void printMatrix() {
         for(int i = 0; i < originalMap.size(); i++) {
             System.out.print(originalMap.get(i) + " ");
         }
-    }*/
+    }
 
 }
