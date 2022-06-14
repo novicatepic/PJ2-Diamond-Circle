@@ -1,5 +1,7 @@
 package cards;
 
+import java.util.LinkedList;
+import java.util.Queue;
 import java.util.Random;
 
 public class Deck {
@@ -7,73 +9,78 @@ public class Deck {
     private final int NUMBER_OF_SPECIAL_CARDS = 12;
     private final int NUMBER_OF_SIMPLE_CARDS = 40;
     private final int HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS = 10;
-    Card[] cards = new Card[NUMBER_OF_CARDS];
+    Queue<Card> cardQueue = new LinkedList<>();
 
     public Deck() {
         Random random = new Random();
         int special = 0, simple = 0;
         int i = 0;
         int numberOfOnes = 0, numberOfTwos = 0, numberOfThrees = 0, numberOfFours = 0;
-        while(i != NUMBER_OF_CARDS) {
+        boolean isSpecialLast = false;
+        while (i != NUMBER_OF_CARDS) {
             boolean nextBoolean = random.nextBoolean();
-            if(nextBoolean && simple != NUMBER_OF_SIMPLE_CARDS) {
+            if (nextBoolean && simple != NUMBER_OF_SIMPLE_CARDS) {
                 int cardNumber = random.nextInt(4) + 1;
                 switch (cardNumber) {
                     case 1:
-                        if(numberOfOnes != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
-                            cards[i++] = new SimpleCard(cardNumber);
+                        if (numberOfOnes != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
+                            addSimpleCardToQueue(cardNumber);
+                            i++;
                             numberOfOnes++;
                             simple++;
+                            isSpecialLast = false;
                             break;
-                        }
-                        else {
+                        } else {
                             cardNumber++;
                         }
                     case 2:
-                        if(numberOfTwos != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
-                            cards[i++] = new SimpleCard(cardNumber);
+                        if (numberOfTwos != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
+                            addSimpleCardToQueue(cardNumber);
+                            i++;
                             numberOfTwos++;
                             simple++;
+                            isSpecialLast = false;
                             break;
-                        }
-                        else {
+                        } else {
                             cardNumber++;
                         }
                     case 3:
-                        if(numberOfThrees != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
-                            cards[i++] = new SimpleCard(cardNumber);
+                        if (numberOfThrees != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
+                            addSimpleCardToQueue(cardNumber);
+                            i++;
                             numberOfThrees++;
                             simple++;
+                            isSpecialLast = false;
                             break;
-                        }
-                        else {
+                        } else {
                             cardNumber++;
                         }
                     case 4:
-                        if(numberOfFours != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
-                            cards[i++] = new SimpleCard(cardNumber);
+                        if (numberOfFours != HOW_MANY_FOR_EACH_IN_SIMPLE_CARDS) {
+                            addSimpleCardToQueue(cardNumber);
+                            i++;
                             numberOfFours++;
                             simple++;
+                            isSpecialLast = false;
                         }
                         break;
                 }
-            }
-            else if(!nextBoolean && special != NUMBER_OF_SPECIAL_CARDS){
-                if(i > 0 && !(cards[i-1] instanceof SpecialCard) && i != NUMBER_OF_CARDS - 1) {
-                    cards[i++] = new SpecialCard();
-                    special++;
-                }
+            } else if (!nextBoolean && special != NUMBER_OF_SPECIAL_CARDS && !isSpecialLast) {
+                cardQueue.add(new SpecialCard());
+                special++;
+                i++;
+                isSpecialLast = true;
             }
         }
     }
 
-    public Card pullOutACard() {
-        Card pullOut = cards[0];
+    private void addSimpleCardToQueue(int cardNumber) {
+        cardQueue.add(new SimpleCard(cardNumber));
+    }
 
-        for(int i = 1; i < NUMBER_OF_CARDS; i++) {
-            cards[i - 1] = cards[i];
-        }
-        cards[NUMBER_OF_CARDS - 1] = pullOut;
+    public Card pullOutACard() {
+        Card pullOut = cardQueue.remove();
+        cardQueue.add(pullOut);
 
         return pullOut;
     }

@@ -1,6 +1,6 @@
 package cards;
 
-public class Card {
+abstract public class Card {
     Card() {
 
     }

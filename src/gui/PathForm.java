@@ -1,7 +1,6 @@
 package gui;
 
 import game.GameMatrix;
-
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;

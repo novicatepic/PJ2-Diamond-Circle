@@ -57,17 +57,7 @@ abstract public class Figure {
         this.time = time;
     }
 
-    public String checkTypeOfFigure() {
-        if(this instanceof FlyingFigure) {
-            return "FLYING";
-        }
-        else if(this instanceof StandardFigure) {
-            return "STANDARD";
-        }
-        else {
-            return "SUPER";
-        }
-    }
+    abstract public String checkTypeOfFigure();
 
     public boolean didFigureFinish() {
         return (position == GameMatrix.getMapTraversal().size());

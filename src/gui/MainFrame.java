@@ -27,7 +27,8 @@ public class MainFrame extends JFrame {
     private final Game game;
     private static JLabel timePlayedLabel;
     private final RefreshingForm refreshingForm = new RefreshingForm();
-    private final String workingDirectory = "./";
+    private static final String workingDirectory = "./";
+    private static final String picDirectory = "./cardpictures/";
 
     public MainFrame(Game game) {
         this.game = game;
@@ -142,7 +143,7 @@ public class MainFrame extends JFrame {
     private void shrinkingAndPuttingImage(String imageName) {
         BufferedImage img;
         try {
-            img = ImageIO.read(new File(imageName));
+            img = ImageIO.read(new File(picDirectory + imageName));
             Image dimg = img.getScaledInstance(cardPicLabel.getWidth(), cardPicLabel.getHeight(), Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(dimg);
             cardPicLabel.setIcon(imageIcon);
@@ -159,7 +160,7 @@ public class MainFrame extends JFrame {
             yCoordinate = pair.getY();
         }
         try {
-            BufferedImage img = ImageIO.read(new File("diamond.png"));
+            BufferedImage img = ImageIO.read(new File(picDirectory + "diamond.png"));
             Image dimg = img.getScaledInstance(matrixLabels[xCoordinate][yCoordinate].getWidth(),
                     matrixLabels[xCoordinate][yCoordinate].getHeight(), Image.SCALE_SMOOTH);
             ImageIcon imageIcon = new ImageIcon(dimg);
@@ -389,34 +390,26 @@ public class MainFrame extends JFrame {
     }
 
     private void setupPlayerLabels(JPanel playerPanel) {
-        JLabel playerOneLabel = new JLabel(game.getRandomizedPlayers()[0].getName());
-        playerOneLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        playerOneLabel.setBounds(131, 10, 75, 33);
-        setFigureLabelColours(0, playerOneLabel);
-        playerPanel.add(playerOneLabel);
-
-
-        JLabel playerTwoLabel = new JLabel(game.getRandomizedPlayers()[1].getName());
-        playerTwoLabel.setHorizontalAlignment(SwingConstants.CENTER);
-        playerTwoLabel.setBounds(280, 10, 75, 33);
-        playerPanel.add(playerTwoLabel);
-        setFigureLabelColours(1, playerTwoLabel);
+        setUpEachPlayer(0, 131, playerPanel);
+        setUpEachPlayer(1, 280, playerPanel);
 
         if (GameMatrix.getNumberOfPlayers() > 2) {
-            JLabel playerThreeLabel = new JLabel(game.getRandomizedPlayers()[2].getName());
-            playerThreeLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            playerThreeLabel.setBounds(470, 10, 75, 33);
-            playerPanel.add(playerThreeLabel);
-            setFigureLabelColours(2, playerThreeLabel);
+            setUpEachPlayer(2, 470, playerPanel);
         }
 
         if (GameMatrix.getNumberOfPlayers() == 4) {
-            JLabel playerFourLabel = new JLabel(game.getRandomizedPlayers()[3].getName());
-            playerFourLabel.setHorizontalAlignment(SwingConstants.CENTER);
-            playerFourLabel.setBounds(619, 10, 75, 33);
-            playerPanel.add(playerFourLabel);
-            setFigureLabelColours(3, playerFourLabel);
+            setUpEachPlayer(3, 619, playerPanel);
         }
+    }
+
+    private void setUpEachPlayer(int x, int x1, JPanel playerPanel) {
+        JLabel playerLabel = new JLabel(game.getRandomizedPlayers()[x].getName());
+        playerLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        playerLabel.setOpaque(true);
+        playerLabel.setBackground(Color.BLACK);
+        playerLabel.setBounds(x1, 10, 75, 33);
+        playerPanel.add(playerLabel);
+        setFigureLabelColours(x, playerLabel);
     }
 
     private void startStopSetupAndGo() {
@@ -434,9 +427,6 @@ public class MainFrame extends JFrame {
                                 Game.getGhostFigure().notify();
                                 game.notify();
                             }
-                        }
-                        synchronized (refreshingForm) {
-                            refreshingForm.notify();
                         }
                     } catch (Exception ex) {
                         Game.log(ex);
@@ -498,6 +488,8 @@ public class MainFrame extends JFrame {
                 matrixLabels[i][j] = new JLabel();
                 String text = String.valueOf(i * GameMatrix.getMatrixDimensions() + j + 1);
                 matrixLabels[i][j].setText(text);
+                matrixLabels[i][j].setHorizontalAlignment(SwingConstants.CENTER);
+                matrixLabels[i][j].setVerticalAlignment(SwingConstants.CENTER);
                 matrixPanel.add(matrixLabels[i][j]);
             }
         }

@@ -9,5 +9,9 @@ public class StandardFigure extends Figure implements IDroppable {
         super(colour);
     }
 
+    @Override
+    public String checkTypeOfFigure() {
+        return "STANDARD";
+    }
 
 }

@@ -1,6 +1,6 @@
 package bonus;
 
-public class Bonus {
+abstract public class Bonus {
     public Bonus() {
         super();
     }

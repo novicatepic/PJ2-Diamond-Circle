@@ -3,7 +3,6 @@ package game;
 import bonus.Bonus;
 import exceptions.*;
 import figure.*;
-import hole.Hole;
 import pair.Pair;
 import path.PathClass;
 import player.Player;
@@ -21,8 +20,7 @@ public class GameMatrix {
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
-    String[] colours = new String[]{"yellow", "blue", "red", "green"};
-    ArrayList<String> coloursList = new ArrayList<>(Arrays.asList(colours));
+    ArrayList<String> coloursList = new ArrayList<>();
 
     GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers,
             IncorrectColour, IOException, InvalidNumberOfNamesException, DuplicateNamesException {
@@ -30,13 +28,14 @@ public class GameMatrix {
         Properties properties = new Properties();
         properties.load(fis);
         MATRIX_DIMENSIONS = Integer.parseInt(properties.getProperty("MATRIX-DIMENSIONS"));
-        NUMBER_OF_PLAYERS = Integer.parseInt(properties.getProperty("NUMBER_OF_PLAYERS"));
+        NUMBER_OF_PLAYERS = Integer.parseInt(properties.getProperty("NUMBER-OF-PLAYERS"));
         if(MATRIX_DIMENSIONS < 7 || MATRIX_DIMENSIONS > 10) {
             throw new InvalidMatrixDimension();
         }
         if(NUMBER_OF_PLAYERS < 2 || NUMBER_OF_PLAYERS > 4) {
             throw new InvalidNumberOfPlayers();
         }
+        generateColours();
         MATRIX = new Object[MATRIX_DIMENSIONS][MATRIX_DIMENSIONS];
         putIntegersToMatrix();
         PathClass pathClass = new PathClass(MATRIX, MATRIX_DIMENSIONS);
@@ -45,7 +44,7 @@ public class GameMatrix {
         originalMap.addAll(mapTraversal);
         players = new Player[NUMBER_OF_PLAYERS];
 
-        String[] playerNames = properties.get("playerNames").toString().split(":");
+        String[] playerNames = properties.get("PLAYER-NAMES").toString().split(":");
         if(playerNames.length != NUMBER_OF_PLAYERS) {
             throw new InvalidNumberOfNamesException();
         }
@@ -56,6 +55,13 @@ public class GameMatrix {
             Figure[] figures = generateFigures();
             players[i] = new Player(playerNames[i], figures);
         }
+    }
+
+    private void generateColours() {
+        coloursList.add("yellow");
+        coloursList.add("blue");
+        coloursList.add("red");
+        coloursList.add("green");
     }
 
     private void checkIfSameNamesExist(String[] playerNames) throws DuplicateNamesException {
@@ -98,10 +104,9 @@ public class GameMatrix {
 
     private Figure[] generateFigures() throws IncorrectColour {
         Random random = new Random();
-        String colour;
         Figure[] resultFigures = new Figure[NUMBER_OF_FIGURES];
         int randomColour = random.nextInt(coloursList.size());
-        colour = coloursList.get(randomColour);
+        String colour = coloursList.get(randomColour);
         coloursList.remove(colour);
         for (int i = 0; i < NUMBER_OF_FIGURES; i++) {
             int randomFigure = random.nextInt(3) + 1;
@@ -160,18 +165,10 @@ public class GameMatrix {
     public static int getNumberOfFreePositionsInMatrix() {
         int freePositionCounter = 0;
         for(int i = 0; i < GameMatrix.getMapTraversal().size(); i++) {
-            if(!(GameMatrix.getMapTraversal().get(i) instanceof Bonus) && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)
-                    && !(GameMatrix.getMapTraversal().get(i) instanceof Hole)) {
+            if(!(GameMatrix.getMapTraversal().get(i) instanceof Bonus) && !(GameMatrix.getMapTraversal().get(i) instanceof Figure)) {
                 freePositionCounter++;
             }
         }
         return freePositionCounter;
     }
-
-    public static void printMatrix() {
-        for(int i = 0; i < originalMap.size(); i++) {
-            System.out.print(originalMap.get(i) + " ");
-        }
-    }
-
 }

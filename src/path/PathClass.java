@@ -41,10 +41,6 @@ public class PathClass {
 
     private boolean doesElementExist(int row, int column) {
         return(!(row >= MATRIX_DIMENSIONS || column >= MATRIX_DIMENSIONS || column < 0 || row < 0));
-        /*if (row >= MATRIX_DIMENSIONS || column >= MATRIX_DIMENSIONS || column < 0 || row < 0) {
-            return false;
-        }
-        return true;*/
     }
 
     private ArrayList<Integer> getUnevenMatrixValidPositions(int[] boundaries) {
@@ -90,22 +86,27 @@ public class PathClass {
                 if (!resultSet.contains(startPositionElement)) {
                     resultSet.add(startPositionElement);
                 }
+
                 if (initialValue == boundaries[0]) {
                     row++;
                     column++;
                 }
+
                 if (initialValue == boundaries[1]) {
                     row++;
                     column--;
                 }
+
                 if (initialValue == boundaries[2]) {
                     row--;
                     column--;
                 }
+
                 if (initialValue == boundaries[3]) {
                     row--;
                     column++;
                 }
+
                 if (doesElementExist(row, column)) {
                     startPositionElement += initialValue;
                 }

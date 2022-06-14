@@ -9,4 +9,9 @@ public class FlyingFigure extends Figure implements IFly {
         super(colour);
     }
 
+    @Override
+    public String checkTypeOfFigure() {
+        return "FLYING";
+    }
+
 }

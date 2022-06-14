@@ -4,15 +4,16 @@ import game.Game;
 public class RefreshingForm extends Thread {
 
     private final long start;
-    private long accumulatedSeconds;
+    private final static long[] accumulatedSeconds = new long[16];
     private long accumulatedSecondsHelper;
     private static boolean isOver = false;
     private static long seconds = 0;
+    private static int i = 0;
+    private static long accumulatedInFull = 0;
 
     public RefreshingForm() {
         super();
         start = System.currentTimeMillis();
-        accumulatedSeconds = 0;
         accumulatedSecondsHelper = 0;
     }
 
@@ -22,13 +23,17 @@ public class RefreshingForm extends Thread {
 
     public static long getSeconds() { return seconds * 1000; }
 
+    public static long getAccumulatedSeconds() {
+        return accumulatedSeconds[i++] * 1000;
+    }
+
     @Override
     public void run() {
-        MainFrame.setTimePlayedLabel("0");
         while (!isOver) {
-            accumulatedSeconds += accumulatedSecondsHelper;
+            accumulatedSeconds[i] += accumulatedSecondsHelper;
+            accumulatedInFull += accumulatedSecondsHelper;
             accumulatedSecondsHelper = 0;
-            long time = System.currentTimeMillis() - start - (accumulatedSeconds * 1000);
+            long time = System.currentTimeMillis() - start - (accumulatedInFull * 1000);
             seconds = time / 1000;
             String tmp = ".";
             MainFrame.getCurrCardLabel().setText(MainFrame.getCurrCardLabel().getText() + tmp);
