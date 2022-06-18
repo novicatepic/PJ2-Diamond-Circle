@@ -20,7 +20,7 @@ public class GameMatrix {
     private static Player[] players;
     private static ArrayList<Object> mapTraversal;
     private static final ArrayList<Object> originalMap = new ArrayList<>();
-    ArrayList<String> coloursList = new ArrayList<>();
+    private ArrayList<String> coloursList = new ArrayList<>();
 
     GameMatrix() throws InvalidMatrixDimension, InvalidNumberOfPlayers,
             IncorrectColour, IOException, InvalidNumberOfNamesException, DuplicateNamesException {

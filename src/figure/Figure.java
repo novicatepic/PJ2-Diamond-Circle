@@ -10,6 +10,7 @@ abstract public class Figure {
     private int position = 0;
     private long time;
     private int bonusCount = 0;
+    private String figurePath = "";
 
     public Figure(String colour) throws IncorrectColour {
         if(!"red".equalsIgnoreCase(colour) && !"green".equalsIgnoreCase(colour) &&
@@ -39,6 +40,14 @@ abstract public class Figure {
         else {
             return null;
         }
+    }
+
+    public String getFigurePath() {
+        return figurePath;
+    }
+
+    public void setFigurePath(String figurePath) {
+        this.figurePath = figurePath;
     }
 
     public int getPosition() {

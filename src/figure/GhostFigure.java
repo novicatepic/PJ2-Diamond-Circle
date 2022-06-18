@@ -34,13 +34,10 @@ public class GhostFigure extends Thread {
         }
         while (temp > 0) {
             int positionFromMatrix = random.nextInt(GameMatrix.getMapTraversal().size());
-            //if (!randomPositions.contains(positionFromMatrix) && !(GameMatrix.getMapTraversal().get(positionFromMatrix) instanceof Figure)
-            //        && !(GameMatrix.getMapTraversal().get(positionFromMatrix) instanceof Bonus)) {
             if(!randomPositions.contains(positionFromMatrix)) {
                 randomPositions.add(positionFromMatrix);
                 temp--;
             }
-            //}
         }
         randomPositions = randomPositions.stream().sorted().collect(Collectors.toList());
     }

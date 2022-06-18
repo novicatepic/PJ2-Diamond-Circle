@@ -2,7 +2,7 @@ package exceptions;
 
 public class InvalidNumberOfPlayers extends Exception {
     public InvalidNumberOfPlayers() {
-        System.out.println("Invalid number of players!");
+        super("Invalid number of players!");
     }
 
     public InvalidNumberOfPlayers(String message) {
