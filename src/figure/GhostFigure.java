@@ -5,7 +5,6 @@ import bonus.Diamond;
 import game.Game;
 import gui.MainFrame;
 import game.GameMatrix;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;

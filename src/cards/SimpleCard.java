@@ -11,4 +11,9 @@ public class SimpleCard extends Card {
         return numberOfFieldsToCross;
     }
 
+    @Override
+    public String getCardType() {
+        return "SIMPLE";
+    }
+
 }

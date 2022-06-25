@@ -33,48 +33,29 @@ public class MainFrame extends JFrame {
     public MainFrame(Game game) {
         this.game = game;
         setGamesPlayed();
-
         setTitle("DIAMOND CIRCLE GAME");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setResizable(false);
         setBounds(100, 100, 870, 686);
         mainPane = setUpMainPane();
-
         setUpLbWelcomeAndGamesPlayed();
-
         makeTitle();
-
         startStopSetupAndGo();
-
         JPanel playerPanel = setUpPlayerPanel();
-
         setupPlayerLabels(playerPanel);
-
         JPanel figurePanel = setUpFigurePanel();
-
         setUpPathButtons(figurePanel);
         disablePlayerButtons(playerButtons[8], playerButtons[9], playerButtons[10], playerButtons[11], playerButtons[12], playerButtons[13], playerButtons[14], playerButtons[15]);
-
         setUpCurrCardLabel();
-
         JPanel showFilesPanel = setUpShowFilesPanel();
-
         showFilesSetupAndGo(showFilesPanel);
-
         JPanel cardPanel = setUpCardPanelAndLabels();
-
         initializeConcreteLabel(cardPanel);
-
         initializeMatrix();
-
         buttonActionListeners();
-
         setUpTimePlayedLabel();
-
         refreshingForm.start();
-
         setUpFourCardFields(cardPanel);
-
         setMatrixColors();
     }
 
@@ -105,7 +86,6 @@ public class MainFrame extends JFrame {
         } catch (NullPointerException ex) {
             Game.log(ex);
         }
-
     }
 
     public void setCardDescLabel(String text) {
@@ -150,6 +130,16 @@ public class MainFrame extends JFrame {
         } catch (IOException e) {
             Game.log(e);
         }
+    }
+
+    public void makeFlyingFigureBlink(Pair pair) {
+        matrixLabels[pair.getX()][pair.getY()].setText("CANT DIE:)");
+        try {
+            Thread.sleep(1000);
+        } catch(InterruptedException e) {
+            Game.log(e);
+        }
+        matrixLabels[pair.getX()][pair.getY()].setText("FLYING");
     }
 
     public static void setBonusLabel(int position) {

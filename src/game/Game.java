@@ -7,7 +7,7 @@ import bonus.Bonus;
 import cards.Card;
 import cards.Deck;
 import cards.SimpleCard;
-import cards.SpecialCard;
+import figure.Figure;
 import figure.GhostFigure;
 import gui.RefreshingForm;
 import gui.MainFrame;
@@ -28,11 +28,9 @@ public class Game {
     public static boolean pause = false;
     private final static GhostFigure ghostFigure = new GhostFigure();
     private Player[] randomizedPlayers;
-    private boolean isItOverFlag = false;
     private static MainFrame mainFrame;
     private final String fileName = "./IGRA_";
     private final static Logger logger;
-    private boolean isEaten = false;
 
     static {
         logger = Logger.getGlobal();
@@ -104,26 +102,19 @@ public class Game {
         boolean helpBool = true;
         HashMap<Player, Integer> map = new HashMap<>();
         initializeMap(map);
-        int i = 0;
         try {
             while (!checkIfAllKeysAreEmpty(map)) {
-                while (i != GameMatrix.getNumberOfPlayers()) {
-                    if (isItOverFlag) {
-                        if (i != GameMatrix.getNumberOfPlayers() - 1) {
-                            i++;
-                            isItOverFlag = false;
-                        } else {
-                            ghostFigure.setGhostAlive();
-                            ghostFigure.join();
-                            setRefreshingFormFromGame();
-                            break;
-                        }
-                    }
-                    long figureTimeStart = new Date().getTime();
+                for(int i = 0; i < GameMatrix.getNumberOfPlayers(); i++) {
                     checkGamePause();
                     if (getWhichFigureIsPlayerPlayingWith(map, randomizedPlayers[i]) != -1) {
                         try {
                             int whichFigure = getWhichFigureIsPlayerPlayingWith(map, randomizedPlayers[i]);
+                            if(randomizedPlayers[i].getFigures()[whichFigure].getStartTime() == 0) {
+                                randomizedPlayers[i].getFigures()[whichFigure].setStartTime(new Date().getTime());
+                                randomizedPlayers[i].getFigures()[whichFigure].setTime(0);
+                            } else {
+                                randomizedPlayers[i].getFigures()[whichFigure].setStartTime(new Date().getTime());
+                            }
                             if (helpBool) {
                                 ghostFigure.start();
                                 helpBool = false;
@@ -135,18 +126,18 @@ public class Game {
                                 }
                             }
                             mainFrame.clearHoles();
-                            if (card instanceof SpecialCard) {
-                                mainFrame.setCardDescLabel("SPECIAL");
+                            if ("SPECIAL".equals(card.getCardType())) {
+                                mainFrame.setCardDescLabel(card.getCardType());
                                 mainFrame.setCardPicLabel("special", 0);
-                                processSpecialCard(random, i, map);
+                                processSpecialCard(random, map);
                                 Thread.sleep(1000);
-                                updateFigureTimeInThread(figureTimeStart, randomizedPlayers[i], whichFigure);
-                            } else if (card instanceof SimpleCard) {
+                                updateFigureTimeInThread(randomizedPlayers[i].getFigures()[whichFigure]);
+                            } else if ("SIMPLE".equals(card.getCardType())) {
                                 SimpleCard sCard = (SimpleCard) card;
-                                mainFrame.setCardDescLabel("SIMPLE: " + sCard.getNumberOfFieldsToCross());
+                                mainFrame.setCardDescLabel(card.getCardType() + " " + sCard.getNumberOfFieldsToCross());
                                 mainFrame.setCardPicLabel("simple", sCard.getNumberOfFieldsToCross());
                                 processSimpleCard(map, i, whichFigure, (SimpleCard) card);
-                                updateFigureTimeInThread(figureTimeStart, randomizedPlayers[i], whichFigure);
+                                updateFigureTimeInThread(randomizedPlayers[i].getFigures()[whichFigure]);
                             }
                         } catch (InterruptedException ex) {
                             log(ex);
@@ -157,6 +148,7 @@ public class Game {
             setRefreshingFormFromGame();
             if (ghostFigure.isAlive()) {
                 try {
+                    ghostFigure.setGhostAlive();
                     ghostFigure.join();
                 } catch (InterruptedException ex) {
                     log(ex);
@@ -184,16 +176,11 @@ public class Game {
         }
     }
 
-    private void updateFigureTimeInThread(long figureTimeStart, Player randomizedPlayer, int whichFigure) {
+    private void updateFigureTimeInThread(Figure f) {
         long figureTimeFinish = new Date().getTime();
-        long finalTime = figureTimeFinish - figureTimeStart;
-        if(isEaten || randomizedPlayer.getFigures()[whichFigure].didFigureFinish()) {
-            finalTime -= RefreshingForm.getAccumulatedSeconds();
-            isEaten = false;
-        }
-
-        randomizedPlayer.getFigures()[whichFigure].setTime(
-                randomizedPlayer.getFigures()[whichFigure].getTime() + finalTime);
+        long finalTime = figureTimeFinish - RefreshingForm.getAccumulatedSeconds() * 1000 - f.getStartTime();
+        RefreshingForm.setAccumulatedSeconds();
+        f.setTime(f.getTime() + finalTime);
     }
 
     private void initializeMap(HashMap<Player, Integer> map) {
@@ -216,7 +203,6 @@ public class Game {
                 "polja, pomjera se sa pozicije " + GameMatrix.getOriginalMap().get(playerPosition) + " na " +
                 GameMatrix.getOriginalMap().get(fullPosition) + ".";
         MainFrame.setCurrCardLabel(labelText);
-
         for (int pos = playerPosition; pos <= fullPosition; pos++) {
             checkGamePause();
             Pair realMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos);
@@ -225,23 +211,45 @@ public class Game {
             if (pos == 0 && realMatrixPosition != null) {
                 mainFrame.setMatrixLabel(realColour, realMatrixPosition, newLabelString);
             }
-            if (pos > playerPosition) {
+
+            if(pos != playerPosition && GameMatrix.getMapTraversal().get(pos) instanceof Figure) {
+                Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos-1);
+                GameMatrix.setMapTraversal(pos - 1, null);
+                Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
+                mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
+                while((GameMatrix.getMapTraversal().get(pos) instanceof Figure)) {
+                    if(pos != GameMatrix.getMapTraversal().size() - 1) {
+                        if (!randomizedPlayers[i].getFigures()[whichFigure].getFigurePath().contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
+                            randomizedPlayers[i].getFigures()[whichFigure].setFigurePath(
+                                    randomizedPlayers[i].getFigures()[whichFigure].getFigurePath() + GameMatrix.getOriginalMap().get(pos) + "-");
+                        }
+                        pos++;
+                    }
+                }
+                Pair newMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos);
+                mainFrame.setMatrixLabel(realColour, newMatrixPosition, newLabelString);
+                GameMatrix.setMapTraversal(pos, randomizedPlayers[i].getFigures()[whichFigure]);
+            }
+            else if (pos > playerPosition && !(GameMatrix.getMapTraversal().get(pos) instanceof Figure)) {
                 updateGUIWhileMoving(pos, realMatrixPosition, realColour, newLabelString);
             }
+
             if (pos < GameMatrix.getMapTraversal().size() && GameMatrix.getMapTraversal().get(pos) instanceof Bonus) {
                 pickUpBonus(i, whichFigure, pos);
             }
+
             if (pos < GameMatrix.getMapTraversal().size()) {
                 figureMoved(i, whichFigure, pos);
                 Thread.sleep(1000);
             }
+
             if (pos == GameMatrix.getMapTraversal().size() - 1) {
                 figureFinished(map, i, whichFigure, pos);
             }
         }
     }
 
-    private void processSpecialCard(Random random, int i, HashMap<Player, Integer> map) {
+    private void processSpecialCard(Random random, HashMap<Player, Integer> map) {
         int generatedNumberOfHoles = generateNumberOfHoles();
         List<Integer> holePositions = new ArrayList<>();
         int temp = generatedNumberOfHoles;
@@ -261,21 +269,34 @@ public class Game {
                 for (int k = 0; k < holePositions.size(); k++) {
                     Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(holePositions.get(k));
                     if(oldMatrixPosition != null) {
-                        mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
+                        if(!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IFly)) {
+                            mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, "H");
+                        } else if(GameMatrix.getMapTraversal().get(holePositions.get(k)) != null &&
+                                GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IFly)  {
+                            mainFrame.makeFlyingFigureBlink(oldMatrixPosition);
+                        }
                     }
+
                     if (!(GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IFly)) {
                         if (GameMatrix.getMapTraversal().get(holePositions.get(k)) instanceof IDroppable) {
+                            Figure f = (Figure)GameMatrix.getMapTraversal().get(holePositions.get(k));
+                            Player p = checkWhichPlayerToDelete(f);
                             GameMatrix.setMapTraversal(holePositions.get(k), null);
-                            isEaten = true;
-                            map.put(randomizedPlayers[i], map.get(randomizedPlayers[i]) - 1);
-                            if (map.get(randomizedPlayers[i]) <= 0) {
-                                isItOverFlag = true;
-                            }
+                            map.put(p, map.get(p) - 1);
                         }
                     }
                 }
             }
         }
+    }
+
+    private Player checkWhichPlayerToDelete(Figure f) {
+        for(Player p : randomizedPlayers) {
+            if(p.getFigures()[0].getColour().equals(f.getColour())) {
+                return p;
+            }
+        }
+        return null;
     }
 
     private void writeToFiles() throws IOException {
@@ -305,9 +326,6 @@ public class Game {
     private void figureFinished(HashMap<Player, Integer> map, int i, int whichFigure, int pos) throws InterruptedException {
         GameMatrix.setMapTraversal(randomizedPlayers[i].getFigures()[whichFigure].getPosition(), null);
         map.put(randomizedPlayers[i], map.get(randomizedPlayers[i]) - 1);
-        if (map.get(randomizedPlayers[i]) == 0) {
-            isItOverFlag = true;
-        }
         randomizedPlayers[i].getFigures()[whichFigure].setFigurePath(
                 randomizedPlayers[i].getFigures()[whichFigure].getFigurePath() + GameMatrix.getOriginalMap().get(pos));
         randomizedPlayers[i].getFigures()[whichFigure].setPosition(pos + 1);

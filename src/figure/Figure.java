@@ -11,8 +11,10 @@ abstract public class Figure {
     private long time;
     private int bonusCount = 0;
     private String figurePath = "";
+    private long startTime;
 
     public Figure(String colour) throws IncorrectColour {
+        startTime = 0;
         if(!"red".equalsIgnoreCase(colour) && !"green".equalsIgnoreCase(colour) &&
             !"blue".equalsIgnoreCase(colour) && !"yellow".equalsIgnoreCase(colour)) {
             throw new IncorrectColour();
@@ -78,5 +80,14 @@ abstract public class Figure {
 
     public void setBonusCount(int bonusCount) {
         this.bonusCount = bonusCount;
+    }
+
+
+    public long getStartTime() {
+        return startTime;
+    }
+
+    public void setStartTime(long startTime) {
+        this.startTime = startTime;
     }
 }

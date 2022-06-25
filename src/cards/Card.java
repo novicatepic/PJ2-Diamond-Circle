@@ -5,4 +5,6 @@ abstract public class Card {
 
     }
 
+    abstract public String getCardType();
+
 }

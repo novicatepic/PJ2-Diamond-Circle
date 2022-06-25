@@ -4,11 +4,10 @@ import game.Game;
 public class RefreshingForm extends Thread {
 
     private final long start;
-    private final static long[] accumulatedSeconds = new long[16];
+    private static long accumulatedSeconds;
     private long accumulatedSecondsHelper;
     private static boolean isOver = false;
     private static long seconds = 0;
-    private static int i = 0;
     private static long accumulatedInFull = 0;
 
     public RefreshingForm() {
@@ -24,13 +23,17 @@ public class RefreshingForm extends Thread {
     public static long getSeconds() { return seconds * 1000; }
 
     public static long getAccumulatedSeconds() {
-        return accumulatedSeconds[i++] * 1000;
+        return accumulatedSeconds;
+    }
+
+    public static void setAccumulatedSeconds() {
+        accumulatedSeconds = 0;
     }
 
     @Override
     public void run() {
         while (!isOver) {
-            accumulatedSeconds[i] += accumulatedSecondsHelper;
+            accumulatedSeconds += accumulatedSecondsHelper;
             accumulatedInFull += accumulatedSecondsHelper;
             accumulatedSecondsHelper = 0;
             long time = System.currentTimeMillis() - start - (accumulatedInFull * 1000);

@@ -5,4 +5,9 @@ public class SpecialCard extends Card {
 
     }
 
+    @Override
+    public String getCardType() {
+        return "SPECIAL";
+    }
+
 }
