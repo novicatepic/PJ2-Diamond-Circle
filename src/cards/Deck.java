@@ -81,7 +81,6 @@ public class Deck {
     public Card pullOutACard() {
         Card pullOut = cardQueue.remove();
         cardQueue.add(pullOut);
-
         return pullOut;
     }
 }

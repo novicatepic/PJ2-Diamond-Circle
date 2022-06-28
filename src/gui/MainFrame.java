@@ -134,11 +134,13 @@ public class MainFrame extends JFrame {
 
     public void makeFlyingFigureBlink(Pair pair) {
         matrixLabels[pair.getX()][pair.getY()].setText("CANT DIE:)");
+        matrixLabels[pair.getX()][pair.getY()].setBackground(Color.BLACK);
         try {
             Thread.sleep(1000);
         } catch(InterruptedException e) {
             Game.log(e);
         }
+        matrixLabels[pair.getX()][pair.getY()].setBackground(Color.WHITE);
         matrixLabels[pair.getX()][pair.getY()].setText("FLYING");
     }
 

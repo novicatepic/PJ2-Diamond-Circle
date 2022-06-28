@@ -213,22 +213,11 @@ public class Game {
             }
 
             if(pos != playerPosition && GameMatrix.getMapTraversal().get(pos) instanceof Figure) {
-                Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos-1);
-                GameMatrix.setMapTraversal(pos - 1, null);
-                Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
-                mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
-                while((GameMatrix.getMapTraversal().get(pos) instanceof Figure)) {
-                    if(pos != GameMatrix.getMapTraversal().size() - 1) {
-                        if (!randomizedPlayers[i].getFigures()[whichFigure].getFigurePath().contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
-                            randomizedPlayers[i].getFigures()[whichFigure].setFigurePath(
-                                    randomizedPlayers[i].getFigures()[whichFigure].getFigurePath() + GameMatrix.getOriginalMap().get(pos) + "-");
-                        }
-                        pos++;
-                    }
+                pos = jumpOverFigure(i, whichFigure, pos, realColour, newLabelString);
+                if(pos > fullPosition) {
+                    labelText = updateTextLabel(i, whichFigure, playerPosition, fullPosition, pos);
+                    MainFrame.setCurrCardLabel(labelText);
                 }
-                Pair newMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos);
-                mainFrame.setMatrixLabel(realColour, newMatrixPosition, newLabelString);
-                GameMatrix.setMapTraversal(pos, randomizedPlayers[i].getFigures()[whichFigure]);
             }
             else if (pos > playerPosition && !(GameMatrix.getMapTraversal().get(pos) instanceof Figure)) {
                 updateGUIWhileMoving(pos, realMatrixPosition, realColour, newLabelString);
@@ -247,6 +236,34 @@ public class Game {
                 figureFinished(map, i, whichFigure, pos);
             }
         }
+    }
+
+    private String updateTextLabel(int i, int whichFigure, int playerPosition, int fullPosition, int pos) {
+        String labelText;
+        labelText = "Na potezu je igrac " + randomizedPlayers[i].getName() + "., Figura " + (whichFigure +1) + ", prelazi " + (fullPosition - playerPosition) + "" +
+                "polja, pomjera se sa pozicije " + GameMatrix.getOriginalMap().get(playerPosition) + " na " +
+                GameMatrix.getOriginalMap().get(pos) + ".";
+        return labelText;
+    }
+
+    private int jumpOverFigure(int i, int whichFigure, int pos, Color realColour, String newLabelString) {
+        Pair oldMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos -1);
+        GameMatrix.setMapTraversal(pos - 1, null);
+        Integer element = (Integer) GameMatrix.getMATRIX()[oldMatrixPosition.getX()][oldMatrixPosition.getY()];
+        mainFrame.setMatrixLabel(Color.BLACK, oldMatrixPosition, String.valueOf(element));
+        while((GameMatrix.getMapTraversal().get(pos) instanceof Figure)) {
+            if(pos != GameMatrix.getMapTraversal().size() - 1) {
+                if (!randomizedPlayers[i].getFigures()[whichFigure].getFigurePath().contains(String.valueOf(GameMatrix.getOriginalMap().get(pos)))) {
+                    randomizedPlayers[i].getFigures()[whichFigure].setFigurePath(
+                            randomizedPlayers[i].getFigures()[whichFigure].getFigurePath() + GameMatrix.getOriginalMap().get(pos) + "-");
+                }
+                pos++;
+            }
+        }
+        Pair newMatrixPosition = GameMatrix.getMatrixPositionOfElement(pos);
+        mainFrame.setMatrixLabel(realColour, newMatrixPosition, newLabelString);
+        GameMatrix.setMapTraversal(pos, randomizedPlayers[i].getFigures()[whichFigure]);
+        return pos;
     }
 
     private void processSpecialCard(Random random, HashMap<Player, Integer> map) {
