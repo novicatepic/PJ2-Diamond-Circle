@@ -16,3 +16,12 @@ When you click on the button “Prikaz liste fajlova sa rezultatima”, a new fo
 Logger class must be used to handle exceptions in each and every class.
 
 This is a GUI application made in Java programming language.
+
+
+![d1](https://user-images.githubusercontent.com/62095336/194740581-e0ce97fe-207b-4f35-a309-094aa82920f3.png)
+
+
+![d2](https://user-images.githubusercontent.com/62095336/194740606-6a8029b5-0060-4627-902e-8db31df643f8.png)
+
+
+![d3](https://user-images.githubusercontent.com/62095336/194740614-018e4e59-4e08-4885-8898-e490b9624bc4.png)
